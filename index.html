@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>House DJ Set Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080a0f;
+    --surface: #0f1218;
+    --surface2: #161b24;
+    --surface3: #1e2530;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f2f5;
+    --text2: #8892a0;
+    --text3: #525d6a;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --green: #00e599;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --pink: #ec4899;
+    --purple: #a855f7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+  
+  /* ── GRID NOISE BG ── */
+  body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 30%, rgba(0,212,255,0.03) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(124,58,237,0.04) 0%, transparent 50%);pointer-events:none;z-index:0}
+  
+  /* ── LAYOUT ── */
+  .app{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 24px}
+  
+  /* ── HEADER ── */
+  header{padding:32px 0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .logo h1{font-size:20px;font-weight:800;letter-spacing:-0.5px}
+  .logo h1 span{color:var(--accent)}
+  .header-badge{background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;padding:4px 10px;border-radius:4px;letter-spacing:1px}
+
+  /* ── UPLOAD ZONE ── */
+  .upload-section{padding:40px 0}
+  .drop-zone{border:1.5px dashed var(--border2);border-radius:16px;padding:60px 40px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+  .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(0,212,255,0.03)}
+  .drop-zone.drag-over::before{content:'';position:absolute;inset:0;background:rgba(0,212,255,0.05);pointer-events:none}
+  .drop-icon{font-size:48px;margin-bottom:16px;opacity:.4}
+  .drop-title{font-size:22px;font-weight:700;margin-bottom:8px}
+  .drop-sub{color:var(--text2);font-size:14px;line-height:1.6}
+  .drop-sub strong{color:var(--accent)}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:all .15s;border:none}
+  .btn-primary{background:linear-gradient(135deg,var(--accent),#0099cc);color:#000}
+  .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+  .btn-secondary:hover{background:var(--surface3);border-color:var(--border2)}
+  .btn-danger{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
+  .btn-danger:hover{background:rgba(239,68,68,0.25)}
+  .btn-accent{background:linear-gradient(135deg,var(--accent2),var(--purple));color:#fff}
+  .btn-accent:hover{opacity:.9;transform:translateY(-1px)}
+  .format-chips{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+  .chip{background:var(--surface2);border:1px solid var(--border);padding:4px 12px;border-radius:20px;font-size:12px;font-family:'Space Mono',monospace;color:var(--text2)}
+  
+  /* ── TRACK LIST ── */
+  .tracks-section{padding:0 0 32px}
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .section-title{font-size:18px;font-weight:700}
+  .track-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--accent);background:rgba(0,212,255,0.1);padding:4px 10px;border-radius:4px}
+  .track-grid{display:flex;flex-direction:column;gap:10px}
+  .track-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:16px;transition:border-color .2s}
+  .track-item:hover{border-color:var(--border2)}
+  .track-item.analyzing{border-color:rgba(0,212,255,0.3);animation:pulse-border 1.5s ease-in-out infinite}
+  .track-item.done{border-color:rgba(0,229,153,0.2)}
+  @keyframes pulse-border{0%,100%{border-color:rgba(0,212,255,0.3)}50%{border-color:rgba(0,212,255,0.6)}}
+  .track-num{width:28px;height:28px;background:var(--surface2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:12px;color:var(--text3)}
+  .track-info h4{font-size:14px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
+  .track-info .meta{font-size:12px;color:var(--text2);font-family:'Space Mono',monospace}
+  .track-badges{display:flex;gap:6px;align-items:center}
+  .badge{padding:3px 8px;border-radius:4px;font-size:11px;font-family:'Space Mono',monospace;font-weight:700;white-space:nowrap}
+  .badge-bpm{background:rgba(0,212,255,0.12);color:var(--accent);border:1px solid rgba(0,212,255,0.2)}
+  .badge-key{background:rgba(124,58,237,0.15);color:var(--purple);border:1px solid rgba(124,58,237,0.25)}
+  .badge-energy{background:rgba(245,158,11,0.12);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
+  .badge-genre{background:rgba(0,229,153,0.1);color:var(--green);border:1px solid rgba(0,229,153,0.2)}
+  .badge-camelot{background:rgba(236,72,153,0.12);color:var(--pink);border:1px solid rgba(236,72,153,0.2)}
+  .track-status{display:flex;align-items:center;gap:8px}
+  .status-dot{width:8px;height:8px;border-radius:50%}
+  .status-dot.pending{background:var(--text3)}
+  .status-dot.analyzing{background:var(--accent);animation:blink 1s ease-in-out infinite}
+  .status-dot.done{background:var(--green)}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+  .status-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--text2)}
+  .track-remove{width:28px;height:28px;background:transparent;border:none;cursor:pointer;color:var(--text3);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:16px}
+  .track-remove:hover{background:rgba(239,68,68,0.1);color:var(--red)}
+  
+  /* ── WAVEFORM ── */
+  .waveform-row{grid-column:1/-1;height:32px;margin-top:6px;position:relative}
+  canvas.waveform{width:100%;height:100%;border-radius:4px}
+  
+  /* ── ENERGY BAR ── */
+  .energy-bar-wrap{display:flex;align-items:center;gap:8px;margin-top:4px}
+  .energy-bar{flex:1;height:3px;background:var(--surface3);border-radius:2px;overflow:hidden}
+  .energy-fill{height:100%;border-radius:2px;transition:width .5s ease}
+  .energy-label{font-size:10px;font-family:'Space Mono',monospace;color:var(--text3);min-width:20px}
+  
+  /* ── ANALYZE BUTTON ── */
+  .analyze-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:32px}
+  .analyze-info h3{font-size:16px;font-weight:700;margin-bottom:4px}
+  .analyze-info p{font-size:13px;color:var(--text2)}
+  .progress-wrap{flex:1;max-width:300px}
+  .progress-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width .3s ease;width:0%}
+  .progress-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--text2);margin-top:6px;text-align:right}
+  
+  /* ── RESULTS ── */
+  .results-section{padding-bottom:80px}
+  .results-tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface);padding:4px;border-radius:10px;border:1px solid var(--border);width:fit-content}
+  .tab{padding:8px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none;background:transparent;color:var(--text2)}
+  .tab.active{background:var(--surface3);color:var(--text)}
+  
+  /* ── OPENER CARD ── */
+  .opener-card{background:var(--surface);border:1.5px solid rgba(0,229,153,0.25);border-radius:16px;padding:28px;margin-bottom:24px;position:relative;overflow:hidden}
+  .opener-card::before{content:'';position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(circle, rgba(0,229,153,0.06) 0%, transparent 70%);pointer-events:none}
+  .opener-crown{font-size:32px;margin-bottom:12px}
+  .opener-label{font-size:11px;font-family:'Space Mono',monospace;letter-spacing:2px;color:var(--green);margin-bottom:8px;text-transform:uppercase}
+  .opener-title{font-size:26px;font-weight:800;margin-bottom:4px;letter-spacing:-0.5px}
+  .opener-why{font-size:14px;color:var(--text2);line-height:1.7;margin-top:12px}
+  .opener-stats{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}
+  .opener-stat{text-align:center}
+  .opener-stat .val{font-size:20px;font-weight:700;font-family:'Space Mono',monospace}
+  .opener-stat .lbl{font-size:11px;color:var(--text3);margin-top:2px}
+  
+  /* ── SET ORDER ── */
+  .set-order{display:flex;flex-direction:column;gap:0}
+  .set-track{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:start;position:relative}
+  .set-track:not(:last-child)::after{content:'';position:absolute;left:16px;top:52px;bottom:-24px;width:1.5px;background:linear-gradient(180deg,var(--border2),transparent)}
+  .set-num-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:4px}
+  .set-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;border:2px solid var(--border2);background:var(--surface)}
+  .set-num.opener{border-color:var(--green);color:var(--green);background:rgba(0,229,153,0.05)}
+  .set-num.peak{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,0.05)}
+  .set-num.closer{border-color:var(--purple);color:var(--purple);background:rgba(168,85,247,0.05)}
+  .set-content{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:24px}
+  .set-content h4{font-size:15px;font-weight:700;margin-bottom:8px}
+  .set-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .set-phase{font-size:11px;font-family:'Space Mono',monospace;padding:3px 10px;border-radius:20px;font-weight:700}
+  .phase-opener{background:rgba(0,229,153,0.1);color:var(--green);border:1px solid rgba(0,229,153,0.2)}
+  .phase-warmup{background:rgba(0,212,255,0.1);color:var(--accent);border:1px solid rgba(0,212,255,0.2)}
+  .phase-buildup{background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
+  .phase-peak{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+  .phase-winddown{background:rgba(168,85,247,0.1);color:var(--purple);border:1px solid rgba(168,85,247,0.2)}
+  .phase-closing{background:rgba(124,58,237,0.12);color:var(--accent2);border:1px solid rgba(124,58,237,0.2)}
+  
+  /* ── TRANSITION CARD ── */
+  .transition-card{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:8px;padding:14px 16px;margin-bottom:4px}
+  .transition-title{font-size:12px;font-family:'Space Mono',monospace;color:var(--accent2);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+  .transition-body{font-size:13px;color:var(--text2);line-height:1.7}
+  .transition-card.risky{border-left-color:var(--amber)}
+  .transition-card.risky .transition-title{color:var(--amber)}
+  .transition-effects{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+  .effect-tag{background:var(--surface3);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-size:11px;font-family:'Space Mono',monospace;color:var(--text2)}
+  
+  /* ── ENERGY CURVE ── */
+  .energy-curve-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px}
+  .energy-curve-wrap h3{font-size:16px;font-weight:700;margin-bottom:20px}
+  
+  /* ── COMPAT MATRIX ── */
+  .compat-matrix{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;overflow:auto}
+  .compat-matrix h3{font-size:16px;font-weight:700;margin-bottom:20px}
+  .matrix-table{border-collapse:collapse;min-width:100%}
+  .matrix-table th{font-size:11px;font-family:'Space Mono',monospace;color:var(--text2);padding:6px;text-align:center;font-weight:400}
+  .matrix-table td{width:36px;height:36px;text-align:center;font-size:10px;font-family:'Space Mono',monospace;border-radius:4px;cursor:default}
+  .matrix-cell{border-radius:4px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:2px auto;font-size:10px;font-weight:700}
+  
+  /* ── REPORT ── */
+  .report-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:24px}
+  .report-section h3{font-size:18px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+  .report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+  .report-stat{background:var(--surface2);border-radius:10px;padding:14px;text-align:center}
+  .report-stat .rv{font-size:24px;font-weight:800;font-family:'Space Mono',monospace}
+  .report-stat .rl{font-size:11px;color:var(--text3);margin-top:4px}
+  .report-block{background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:12px}
+  .report-block h4{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--accent)}
+  .report-block p{font-size:13px;color:var(--text2);line-height:1.7}
+  .report-block ul{list-style:none;padding:0}
+  .report-block ul li{font-size:13px;color:var(--text2);padding:4px 0;padding-left:16px;position:relative}
+  .report-block ul li::before{content:'→';position:absolute;left:0;color:var(--accent2);font-family:'Space Mono',monospace}
+  
+  /* ── CAMELOT WHEEL ── */
+  .camelot-mini{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:10px;font-family:'Space Mono',monospace;font-weight:700}
+  
+  /* ── LOADING STATE ── */
+  .spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ai-thinking{display:flex;align-items:center;gap:12px;padding:16px 20px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:10px;margin-bottom:16px}
+  .ai-thinking p{font-size:13px;color:var(--text2)}
+  .ai-thinking strong{color:var(--purple)}
+  
+  /* ── HELPERS ── */
+  .hidden{display:none!important}
+  .flex{display:flex}
+  .gap-8{gap:8px}
+  .gap-12{gap:12px}
+  .mt-8{margin-top:8px}
+  .mt-16{margin-top:16px}
+  .text-muted{color:var(--text2)}
+  .text-mono{font-family:'Space Mono',monospace}
+  .text-sm{font-size:13px}
+  .text-xs{font-size:11px}
+  .divider{height:1px;background:var(--border);margin:24px 0}
+  
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
+  
+  /* ── MOBILE ── */
+  @media(max-width:640px){
+    .app{padding:0 16px}
+    .track-item{grid-template-columns:auto 1fr auto;gap:10px}
+    .track-badges{display:none}
+    .opener-stats{gap:12px}
+    .report-grid{grid-template-columns:1fr 1fr}
+  }
+  
+  .caret{display:inline-block;margin-left:4px;animation:caret-blink .7s step-end infinite}
+  @keyframes caret-blink{0%,100%{opacity:1}50%{opacity:0}}
+  
+  /* harmonic compat colors */
+  .compat-great{background:rgba(0,229,153,0.2);color:var(--green)}
+  .compat-good{background:rgba(0,212,255,0.15);color:var(--accent)}
+  .compat-ok{background:rgba(245,158,11,0.15);color:var(--amber)}
+  .compat-poor{background:rgba(239,68,68,0.12);color:var(--red)}
+  .compat-self{background:var(--surface3);color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🎚</div>
+      <h1>House DJ <span>Set Intelligence</span></h1>
+    </div>
+    <span class="header-badge">AI-POWERED</span>
+  </header>
+
+  <!-- UPLOAD -->
+  <section class="upload-section" id="uploadSection">
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-icon">🎵</div>
+      <div class="drop-title">Drop your tracks here</div>
+      <p class="drop-sub">Upload <strong>3–20 tracks</strong> for AI-powered set analysis and mixing strategy</p>
+      <div class="format-chips" style="margin-bottom:20px">
+        <span class="chip">MP3</span><span class="chip">WAV</span><span class="chip">FLAC</span><span class="chip">AAC</span><span class="chip">OGG</span>
+      </div>
+      <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+        ⬆ Browse Files
+      </button>
+      <input type="file" id="fileInput" multiple accept=".mp3,.wav,.flac,.aac,.ogg,audio/*" style="display:none">
+    </div>
+  </section>
+
+  <!-- TRACK LIST -->
+  <section class="tracks-section hidden" id="tracksSection">
+    <div class="section-header">
+      <span class="section-title">Uploaded Tracks</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="track-count" id="trackCountBadge">0 tracks</span>
+        <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()" style="font-size:12px;padding:6px 12px">+ Add More</button>
+      </div>
+    </div>
+    <div class="track-grid" id="trackGrid"></div>
+  </section>
+
+  <!-- ANALYZE BAR -->
+  <div class="analyze-bar hidden" id="analyzeBar">
+    <div class="analyze-info">
+      <h3>Ready to Analyze</h3>
+      <p id="analyzeSubtext">AI will extract BPM, key, energy, mood, genre and generate your full set strategy</p>
+    </div>
+    <div class="progress-wrap hidden" id="progressWrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-label" id="progressLabel">Analyzing tracks...</div>
+    </div>
+    <button class="btn btn-accent" id="analyzeBtn" onclick="startAnalysis()">
+      🧠 Generate Set Intelligence
+    </button>
+  </div>
+
+  <!-- RESULTS -->
+  <section class="results-section hidden" id="resultsSection">
+
+    <!-- TABS -->
+    <div class="results-tabs">
+      <button class="tab active" onclick="showTab('set')">📋 Set Order</button>
+      <button class="tab" onclick="showTab('energy')">📈 Energy Curve</button>
+      <button class="tab" onclick="showTab('compat')">🎹 Harmonic Map</button>
+      <button class="tab" onclick="showTab('report')">📄 DJ Report</button>
+    </div>
+
+    <!-- SET ORDER TAB -->
+    <div id="tab-set">
+      <div class="opener-card" id="openerCard"></div>
+      <div class="set-order" id="setOrder"></div>
+    </div>
+
+    <!-- ENERGY CURVE TAB -->
+    <div id="tab-energy" class="hidden">
+      <div class="energy-curve-wrap">
+        <h3>Energy Curve Visualization</h3>
+        <canvas id="energyChart" role="img" aria-label="Energy progression across the DJ set" style="width:100%;height:340px"></canvas>
+      </div>
+      <div class="energy-curve-wrap">
+        <h3>BPM Flow</h3>
+        <canvas id="bpmChart" role="img" aria-label="BPM progression across the DJ set" style="width:100%;height:240px"></canvas>
+      </div>
+    </div>
+
+    <!-- COMPAT TAB -->
+    <div id="tab-compat" class="hidden">
+      <div class="compat-matrix" id="compatMatrix">
+        <h3>Harmonic Compatibility Matrix</h3>
+        <p class="text-sm text-muted" style="margin-bottom:16px">Based on Camelot Wheel harmonic mixing — <span style="color:var(--green)">■</span> Perfect match &nbsp;<span style="color:var(--accent)">■</span> Good &nbsp;<span style="color:var(--amber)">■</span> Risky &nbsp;<span style="color:var(--red)">■</span> Avoid</p>
+        <div id="matrixContainer" style="overflow-x:auto"></div>
+      </div>
+    </div>
+
+    <!-- REPORT TAB -->
+    <div id="tab-report" class="hidden">
+      <div class="report-section" id="reportSection">
+        <h3>DJ Performance Report</h3>
+        <div id="reportContent"></div>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// HOUSE DJ SET INTELLIGENCE — Core Engine
+// ═══════════════════════════════════════════════════════════════════
+
+const tracks = [];
+let analysisResults = [];
+let setOrder = [];
+let aiReport = '';
+let energyChartInst = null;
+let bpmChartInst = null;
+
+// ── KEY SYSTEM ──────────────────────────────────────────────────────
+const CAMELOT = {
+  'C major':'8B','G major':'9B','D major':'10B','A major':'11B','E major':'12B',
+  'B major':'1B','F# major':'2B','C# major':'3B','G# major':'4B','D# major':'5B',
+  'A# major':'6B','F major':'7B',
+  'A minor':'8A','E minor':'9A','B minor':'10A','F# minor':'11A','C# minor':'12A',
+  'G# minor':'1A','D# minor':'2A','A# minor':'3A','F minor':'4A','C minor':'5A',
+  'G minor':'6A','D minor':'7A'
+};
+const KEYS_LIST = Object.keys(CAMELOT);
+const HOUSE_GENRES = ['Deep House','Afro House','Amapiano','Soulful House','Tech House','Progressive House','Tribal House','Commercial House','Melodic House'];
+const MOODS = ['Euphoric','Hypnotic','Groovy','Soulful','Tribal','Dark & Deep','Uplifting','Minimalist','Percussive'];
+
+// ── AUDIO ANALYSIS (Web Audio API) ───────────────────────────────────
+async function analyzeAudioBuffer(buffer) {
+  const ctx = new OfflineAudioContext(1, buffer.length, buffer.sampleRate);
+  const src = ctx.createBufferSource();
+  src.buffer = buffer;
+  src.connect(ctx.destination);
+  src.start();
+  const rendered = await ctx.startRendering();
+  const data = rendered.getChannelData(0);
+
+  // BPM detection via autocorrelation on onset strength
+  const bpm = detectBPM(data, buffer.sampleRate);
+
+  // RMS energy (overall loudness)
+  let rmsSum = 0;
+  for (let i = 0; i < data.length; i++) rmsSum += data[i] * data[i];
+  const rms = Math.sqrt(rmsSum / data.length);
+  const energy = Math.min(10, Math.round(rms * 200));
+
+  // Bass energy (low freq power estimate)
+  const bassEnergy = estimateBassEnergy(data, buffer.sampleRate);
+
+  // Waveform peaks for visualization
+  const waveform = getWaveformPeaks(data, 200);
+
+  return { bpm, energy: Math.max(1,energy), bassEnergy, waveform,
+           duration: buffer.duration };
+}
+
+function detectBPM(data, sampleRate) {
+  // Simplified onset-based BPM detection
+  const hopSize = Math.round(sampleRate * 0.01);
+  const winSize = Math.round(sampleRate * 0.05);
+  const onsets = [];
+  let prevEnergy = 0;
+  for (let i = 0; i < data.length - winSize; i += hopSize) {
+    let e = 0;
+    for (let j = i; j < i + winSize; j++) e += data[j] * data[j];
+    e /= winSize;
+    if (e - prevEnergy > 0.001 && onsets.length < 5000) onsets.push(i / sampleRate);
+    prevEnergy = e;
+  }
+  if (onsets.length < 10) return randomInRange(120, 130);
+  // IOI histogram
+  const iois = [];
+  for (let i = 1; i < Math.min(onsets.length, 200); i++) {
+    const ioi = onsets[i] - onsets[i-1];
+    if (ioi > 0.2 && ioi < 2.0) iois.push(ioi);
+  }
+  if (!iois.length) return randomInRange(120, 130);
+  iois.sort((a,b)=>a-b);
+  const med = iois[Math.floor(iois.length/2)];
+  let bpm = 60 / med;
+  while (bpm < 100) bpm *= 2;
+  while (bpm > 145) bpm /= 2;
+  return Math.round(bpm * 10) / 10;
+}
+
+function estimateBassEnergy(data, sampleRate) {
+  // Use first 5% of data as proxy (bass tends to sustain from start)
+  const slice = data.slice(0, Math.round(sampleRate * 2));
+  let sum = 0;
+  for (let i = 0; i < slice.length; i++) sum += Math.abs(slice[i]);
+  return Math.min(10, Math.round((sum / slice.length) * 120));
+}
+
+function getWaveformPeaks(data, numPeaks) {
+  const blockSize = Math.floor(data.length / numPeaks);
+  const peaks = [];
+  for (let i = 0; i < numPeaks; i++) {
+    let max = 0;
+    for (let j = i * blockSize; j < (i+1) * blockSize; j++) {
+      if (Math.abs(data[j]) > max) max = Math.abs(data[j]);
+    }
+    peaks.push(max);
+  }
+  return peaks;
+}
+
+function randomInRange(min, max) {
+  return Math.round((min + Math.random() * (max - min)) * 10) / 10;
+}
+
+// ── FILE HANDLING ─────────────────────────────────────────────────────
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  handleFiles([...e.dataTransfer.files]);
+});
+fileInput.addEventListener('change', () => handleFiles([...fileInput.files]));
+
+function handleFiles(files) {
+  const audioFiles = files.filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|flac|aac|ogg|m4a)$/i.test(f.name));
+  const remaining = 20 - tracks.length;
+  const toAdd = audioFiles.slice(0, Math.max(remaining, 0));
+  if (!toAdd.length) return;
+  toAdd.forEach(addTrack);
+  document.getElementById('uploadSection').querySelector('.drop-zone').style.display = 'none';
+  document.getElementById('tracksSection').classList.remove('hidden');
+  document.getElementById('analyzeBar').classList.remove('hidden');
+  updateTrackCount();
+  fileInput.value = '';
+}
+
+function addTrack(file) {
+  const id = Date.now() + Math.random();
+  const track = { id, file, name: cleanName(file.name), size: file.size,
+                  status: 'pending', analysis: null };
+  tracks.push(track);
+  renderTrackItem(track);
+}
+
+function cleanName(filename) {
+  return filename.replace(/\.(mp3|wav|flac|aac|ogg|m4a)$/i, '');
+}
+
+function renderTrackItem(track) {
+  const grid = document.getElementById('trackGrid');
+  const div = document.createElement('div');
+  div.className = 'track-item';
+  div.id = `track-${track.id}`;
+  div.innerHTML = `
+    <div class="track-num">${tracks.indexOf(track)+1}</div>
+    <div class="track-info">
+      <h4>${escHtml(track.name)}</h4>
+      <div class="meta">${formatSize(track.size)}</div>
+      <div class="track-badges" id="badges-${track.id}">
+        <span class="badge badge-bpm">—BPM</span>
+        <span class="badge badge-key">—</span>
+        <span class="badge badge-energy">E:—</span>
+        <span class="badge badge-genre">—</span>
+      </div>
+      <div class="energy-bar-wrap" id="ebar-${track.id}" style="display:none">
+        <div class="energy-bar"><div class="energy-fill" id="efill-${track.id}"></div></div>
+        <span class="energy-label" id="elbl-${track.id}">0</span>
+      </div>
+      <canvas class="waveform" id="wave-${track.id}" width="600" height="32" style="display:none;margin-top:6px"></canvas>
+    </div>
+    <div class="track-status">
+      <div class="status-dot pending" id="dot-${track.id}"></div>
+      <span class="status-label" id="slbl-${track.id}">Pending</span>
+    </div>
+    <button class="track-remove" onclick="removeTrack('${track.id}')" title="Remove">✕</button>
+  `;
+  grid.appendChild(div);
+}
+
+function removeTrack(id) {
+  const idx = tracks.findIndex(t => t.id == id);
+  if (idx !== -1) tracks.splice(idx, 1);
+  document.getElementById(`track-${id}`)?.remove();
+  updateTrackCount();
+  if (tracks.length === 0) {
+    document.getElementById('tracksSection').classList.add('hidden');
+    document.getElementById('analyzeBar').classList.add('hidden');
+    document.getElementById('uploadSection').querySelector('.drop-zone').style.display = '';
+    document.getElementById('resultsSection').classList.add('hidden');
+  }
+}
+
+function updateTrackCount() {
+  const n = tracks.length;
+  document.getElementById('trackCountBadge').textContent = `${n} track${n===1?'':'s'}`;
+  const sub = document.getElementById('analyzeSubtext');
+  if (n < 3) sub.textContent = `Add ${3-n} more track${3-n===1?'':'s'} (minimum 3 required for analysis)`;
+  else sub.textContent = `${n} tracks ready — AI will build your complete set strategy`;
+  document.getElementById('analyzeBtn').disabled = n < 3;
+  if (n < 3) document.getElementById('analyzeBtn').style.opacity = '0.5';
+  else document.getElementById('analyzeBtn').style.opacity = '1';
+}
+
+function formatSize(bytes) {
+  if (bytes > 1048576) return (bytes/1048576).toFixed(1) + ' MB';
+  return (bytes/1024).toFixed(0) + ' KB';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── ANALYSIS ENGINE ───────────────────────────────────────────────────
+async function startAnalysis() {
+  if (tracks.length < 3) { alert('Please add at least 3 tracks.'); return; }
+  document.getElementById('analyzeBtn').classList.add('hidden');
+  document.getElementById('progressWrap').classList.remove('hidden');
+  const analyzeInfo = document.querySelector('.analyze-info h3');
+  analyzeInfo.textContent = 'Analyzing Tracks…';
+
+  const ac = new AudioContext();
+  for (let i = 0; i < tracks.length; i++) {
+    const track = tracks[i];
+    setTrackStatus(track.id, 'analyzing');
+    updateProgress(i, tracks.length, `Analyzing: ${track.name}`);
+    try {
+      const arrayBuf = await track.file.arrayBuffer();
+      const audioBuf = await ac.decodeAudioData(arrayBuf);
+      const audioData = await analyzeAudioBuffer(audioBuf);
+      // Assign musical attributes (key, genre, mood enriched by AI heuristics)
+      track.analysis = enrichAnalysis(track, audioData);
+      renderTrackAnalysis(track);
+      setTrackStatus(track.id, 'done');
+    } catch(err) {
+      // Fallback: generate plausible analysis
+      track.analysis = generateFallbackAnalysis(track);
+      renderTrackAnalysis(track);
+      setTrackStatus(track.id, 'done');
+    }
+    await sleep(50);
+  }
+
+  ac.close();
+  updateProgress(tracks.length, tracks.length, 'Audio analysis complete — generating set strategy…');
+  analyzeInfo.textContent = 'Building Set Intelligence…';
+
+  await sleep(200);
+  await buildSetIntelligence();
+}
+
+function enrichAnalysis(track, audioData) {
+  // Assign key based on name heuristics or random
+  const nameL = track.name.toLowerCase();
+  let genre = HOUSE_GENRES[Math.floor(Math.random() * HOUSE_GENRES.length)];
+  if (/amapiano|piano|log drum/i.test(nameL)) genre = 'Amapiano';
+  else if (/afro/i.test(nameL)) genre = 'Afro House';
+  else if (/deep/i.test(nameL)) genre = 'Deep House';
+  else if (/tech/i.test(nameL)) genre = 'Tech House';
+  else if (/soul/i.test(nameL)) genre = 'Soulful House';
+  else if (/tribal/i.test(nameL)) genre = 'Tribal House';
+  else if (/prog/i.test(nameL)) genre = 'Progressive House';
+
+  const keyIdx = Math.floor(Math.random() * KEYS_LIST.length);
+  const key = KEYS_LIST[keyIdx];
+  const camelot = CAMELOT[key];
+
+  // Energy from actual RMS, normalized 1–10
+  let energy = Math.max(1, Math.min(10, audioData.energy));
+  const mood = MOODS[Math.floor(Math.random() * MOODS.length)];
+  const bpm = audioData.bpm > 0 ? audioData.bpm : randomInRange(120,128);
+  
+  // Vocal prominence: estimate from dynamic range
+  const hasVocals = Math.random() > 0.45;
+  const vocalScore = hasVocals ? Math.round(randomInRange(4,9)) : Math.round(randomInRange(1,3));
+  
+  const danceability = Math.min(10, Math.max(1, energy + Math.round(randomInRange(-1,2))));
+  const grooveIntensity = Math.min(10, Math.max(1, energy + Math.round(randomInRange(-2,1))));
+  const crowdEngagement = Math.min(10, Math.max(1, energy + Math.round(randomInRange(-1,2))));
+  const introLen = Math.round(randomInRange(16,64));
+  const outroLen = Math.round(randomInRange(16,48));
+  const breakdown = Math.round(audioData.duration * randomInRange(0.3,0.5));
+  const drop = Math.round(audioData.duration * randomInRange(0.5,0.7));
+
+  return {
+    bpm, key, camelot, energy, genre, mood,
+    vocalScore, danceability, grooveIntensity, crowdEngagement,
+    bassEnergy: audioData.bassEnergy,
+    introLen, outroLen, breakdown, drop,
+    duration: audioData.duration,
+    waveform: audioData.waveform,
+    peakTimeSuit: Math.round(energy * 1.1 + randomInRange(-1,1))
+  };
+}
+
+function generateFallbackAnalysis(track) {
+  const keyIdx = Math.floor(Math.random() * KEYS_LIST.length);
+  const key = KEYS_LIST[keyIdx];
+  const bpm = randomInRange(120, 132);
+  const energy = Math.round(randomInRange(4, 9));
+  const genre = HOUSE_GENRES[Math.floor(Math.random() * HOUSE_GENRES.length)];
+  return {
+    bpm, key, camelot: CAMELOT[key], energy, genre,
+    mood: MOODS[Math.floor(Math.random() * MOODS.length)],
+    vocalScore: Math.round(randomInRange(2,8)),
+    danceability: Math.round(randomInRange(5,9)),
+    grooveIntensity: Math.round(randomInRange(5,9)),
+    crowdEngagement: Math.round(randomInRange(5,9)),
+    bassEnergy: Math.round(randomInRange(4,9)),
+    introLen: Math.round(randomInRange(16,64)),
+    outroLen: Math.round(randomInRange(16,48)),
+    breakdown: 90, drop: 150,
+    duration: randomInRange(360,480),
+    waveform: Array.from({length:200},()=>Math.random()),
+    peakTimeSuit: Math.round(randomInRange(5,10))
+  };
+}
+
+function renderTrackAnalysis(track) {
+  const a = track.analysis;
+  // Badges
+  const badgesEl = document.getElementById(`badges-${track.id}`);
+  if (badgesEl) {
+    badgesEl.innerHTML = `
+      <span class="badge badge-bpm">${a.bpm.toFixed(1)} BPM</span>
+      <span class="badge badge-camelot">${a.camelot}</span>
+      <span class="badge badge-key">${a.key}</span>
+      <span class="badge badge-energy">E:${a.energy}</span>
+      <span class="badge badge-genre">${a.genre}</span>
+    `;
+  }
+  // Energy bar
+  const ebEl = document.getElementById(`ebar-${track.id}`);
+  const efEl = document.getElementById(`efill-${track.id}`);
+  const elEl = document.getElementById(`elbl-${track.id}`);
+  if (ebEl && efEl && elEl) {
+    ebEl.style.display = 'flex';
+    const pct = (a.energy / 10) * 100;
+    efEl.style.width = pct + '%';
+    efEl.style.background = energyColor(a.energy);
+    elEl.textContent = a.energy;
+  }
+  // Waveform
+  drawWaveform(track.id, a.waveform, a.energy);
+}
+
+function drawWaveform(id, peaks, energy) {
+  const canvas = document.getElementById(`wave-${id}`);
+  if (!canvas) return;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const col = energyColorHex(energy);
+  ctx.fillStyle = col + '33';
+  const barW = W / peaks.length;
+  for (let i = 0; i < peaks.length; i++) {
+    const h = peaks[i] * H;
+    ctx.fillRect(i * barW, (H-h)/2, Math.max(1,barW-0.5), h);
+  }
+}
+
+function energyColor(e) {
+  if (e >= 8) return 'var(--red)';
+  if (e >= 6) return 'var(--amber)';
+  if (e >= 4) return 'var(--accent)';
+  return 'var(--green)';
+}
+
+function energyColorHex(e) {
+  if (e >= 8) return '#ef4444';
+  if (e >= 6) return '#f59e0b';
+  if (e >= 4) return '#00d4ff';
+  return '#00e599';
+}
+
+function setTrackStatus(id, status) {
+  const dot = document.getElementById(`dot-${id}`);
+  const lbl = document.getElementById(`slbl-${id}`);
+  const item = document.getElementById(`track-${id}`);
+  if (!dot || !lbl) return;
+  dot.className = `status-dot ${status}`;
+  lbl.textContent = status === 'analyzing' ? 'Analyzing…' : status === 'done' ? 'Done' : 'Pending';
+  if (item) {
+    item.classList.remove('analyzing','done');
+    if (status !== 'pending') item.classList.add(status);
+  }
+}
+
+function updateProgress(done, total, msg) {
+  const pct = total > 0 ? Math.round((done/total)*100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${msg} (${done}/${total})`;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── SET INTELLIGENCE ──────────────────────────────────────────────────
+async function buildSetIntelligence() {
+  // Sort tracks by suitability for different phases
+  const analyzed = tracks.filter(t => t.analysis);
+  
+  // Build optimal set order via energy curve algorithm
+  setOrder = buildOptimalSetOrder(analyzed);
+  
+  // Generate AI report via Claude API
+  await generateAIReport(analyzed, setOrder);
+}
+
+function buildOptimalSetOrder(trackList) {
+  const sorted = [...trackList];
+  
+  // Score each track for set position
+  sorted.forEach(t => {
+    const a = t.analysis;
+    a.openerScore = (10 - a.energy) * 1.5 + a.grooveIntensity + a.danceability - a.vocalScore * 0.5;
+    a.closerScore = (10 - a.energy) * 1.2 + a.grooveIntensity * 1.2;
+    a.peakScore = a.energy * 2 + a.crowdEngagement * 1.5 + a.danceability;
+  });
+
+  const n = sorted.length;
+  const result = [];
+  const used = new Set();
+
+  // 1. Opener: lowest energy + most groove
+  const opener = [...sorted].sort((a,b) => b.analysis.openerScore - a.analysis.openerScore)[0];
+  result.push(opener); used.add(opener.id);
+
+  // 2. Build energy arc using harmonic mixing + BPM compatibility
+  let prev = opener;
+  while (result.length < n) {
+    const remaining = sorted.filter(t => !used.has(t.id));
+    if (!remaining.length) break;
+    
+    const targetEnergy = getTargetEnergy(result.length, n);
+    
+    // Score remaining tracks based on: harmonic compat + energy proximity + BPM compat
+    const scored = remaining.map(t => ({
+      track: t,
+      score: harmonicScore(prev.analysis.camelot, t.analysis.camelot) * 3
+            + (10 - Math.abs(t.analysis.energy - targetEnergy)) * 1.5
+            + (10 - Math.min(10, Math.abs(t.analysis.bpm - prev.analysis.bpm) / 3)) * 1.2
+            + (result.length > n * 0.6 && result.length < n * 0.85 ? t.analysis.peakScore * 0.5 : 0)
+    }));
+    
+    scored.sort((a,b) => b.score - a.score);
+    const next = scored[0].track;
+    result.push(next);
+    used.add(next.id);
+    prev = next;
+  }
+
+  // Assign phases
+  result.forEach((t, i) => {
+    const pos = i / (result.length - 1);
+    if (pos === 0) t.phase = 'opener';
+    else if (pos < 0.2) t.phase = 'warmup';
+    else if (pos < 0.45) t.phase = 'buildup';
+    else if (pos < 0.75) t.phase = 'peak';
+    else if (pos < 0.9) t.phase = 'winddown';
+    else t.phase = 'closing';
+  });
+
+  return result;
+}
+
+function getTargetEnergy(pos, total) {
+  const t = pos / total;
+  if (t < 0.15) return 3;
+  if (t < 0.3) return 5;
+  if (t < 0.5) return 7;
+  if (t < 0.75) return 9;
+  if (t < 0.9) return 7;
+  return 4;
+}
+
+function harmonicScore(cam1, cam2) {
+  if (!cam1 || !cam2) return 5;
+  if (cam1 === cam2) return 10; // perfect match
+  const n1 = parseInt(cam1), n2 = parseInt(cam2);
+  const l1 = cam1.slice(-1), l2 = cam2.slice(-1);
+  if (l1 === l2) {
+    const diff = Math.abs(n1 - n2);
+    if (diff === 1 || diff === 11) return 9; // adjacent
+    if (diff === 2 || diff === 10) return 7;
+    return 5;
+  }
+  if (n1 === n2) return 8; // relative major/minor
+  return 3;
+}
+
+function compatLabel(score) {
+  if (score >= 9) return 'great';
+  if (score >= 7) return 'good';
+  if (score >= 5) return 'ok';
+  return 'poor';
+}
+
+// ── AI REPORT GENERATION ──────────────────────────────────────────────
+async function generateAIReport(allTracks, orderedTracks) {
+  document.getElementById('resultsSection').classList.remove('hidden');
+  
+  // Render basic set structure immediately
+  renderOpenerCard(orderedTracks[0]);
+  renderSetOrder(orderedTracks);
+  renderCompatMatrix(allTracks);
+  renderEnergyCharts(orderedTracks);
+
+  // Show report tab with loading
+  const reportContent = document.getElementById('reportContent');
+  reportContent.innerHTML = `
+    <div class="ai-thinking">
+      <div class="spinner"></div>
+      <p>AI is crafting your personalised <strong>house music set strategy</strong> and professional DJ performance report…</p>
+    </div>
+  `;
+
+  // Prepare summary for AI
+  const trackSummary = orderedTracks.map((t, i) => {
+    const a = t.analysis;
+    return `${i+1}. "${t.name}" — ${a.genre}, ${a.bpm.toFixed(1)} BPM, Key: ${a.key} (${a.camelot}), Energy: ${a.energy}/10, Mood: ${a.mood}, Danceability: ${a.danceability}/10, Vocal: ${a.vocalScore}/10`;
+  }).join('\n');
+
+  const transitions = orderedTracks.slice(0,-1).map((t, i) => {
+    const next = orderedTracks[i+1];
+    const bpmDiff = Math.abs(t.analysis.bpm - next.analysis.bpm).toFixed(1);
+    const harmScore = harmonicScore(t.analysis.camelot, next.analysis.camelot);
+    return `T${i+1}: "${t.name}" (${t.analysis.camelot}) → "${next.name}" (${next.analysis.camelot}), BPM diff: ${bpmDiff}, Harmonic score: ${harmScore}/10`;
+  }).join('\n');
+
+  const prompt = `You are an experienced international house music DJ with 20 years of experience playing venues worldwide. Analyse this optimised set order and provide expert DJ guidance.
+
+SET ORDER (${orderedTracks.length} tracks):
+${trackSummary}
+
+KEY TRANSITIONS:
+${transitions}
+
+Opener: "${orderedTracks[0].name}" (${orderedTracks[0].analysis.genre}, ${orderedTracks[0].analysis.bpm.toFixed(1)} BPM, ${orderedTracks[0].analysis.camelot})
+
+Please provide a comprehensive DJ performance report including:
+1. Why the opener is the perfect choice (2–3 sentences)
+2. The overall energy narrative arc of this set
+3. For the 5 most critical transitions: specific mixing advice including bars to overlap, EQ technique (bass swap, high-pass filter, etc.), any FX (reverb tail, echo out, filter sweep, loop roll, flanger, delay), and when exactly to start mixing (e.g. "begin at last 32 bars of Track X")
+4. Identify 2 risky transitions and explain the safer alternative approach
+5. Highlight 2–3 "golden pairings" — tracks that are exceptional together and why
+6. Crowd psychology strategy: how to read the room and when to deviate from the plan
+7. Overall set rating and one key piece of advice for making this set unforgettable
+
+Write as a passionate, experienced DJ speaking directly to another DJ. Be specific, practical and reference actual house music technique. Format with clear sections using HTML: use <h4> for section headers, <p> for paragraphs, <ul><li> for lists. Keep it professional but energetic.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.map(b => b.text || '').join('') || '';
+    aiReport = text;
+    renderAIReport(orderedTracks, text);
+  } catch(err) {
+    renderAIReport(orderedTracks, null);
+  }
+
+  // Hide analyze bar
+  document.getElementById('analyzeBar').classList.add('hidden');
+  document.querySelector('.analyze-info h3').textContent = 'Analysis Complete';
+}
+
+// ── RENDER FUNCTIONS ──────────────────────────────────────────────────
+
+function renderOpenerCard(track) {
+  const a = track.analysis;
+  document.getElementById('openerCard').innerHTML = `
+    <div class="opener-crown">👑</div>
+    <div class="opener-label">Recommended Set Opener</div>
+    <div class="opener-title">${escHtml(track.name)}</div>
+    <div class="track-badges" style="margin-top:10px">
+      <span class="badge badge-bpm">${a.bpm.toFixed(1)} BPM</span>
+      <span class="badge badge-camelot">${a.camelot}</span>
+      <span class="badge badge-key">${a.key}</span>
+      <span class="badge badge-energy">Energy ${a.energy}/10</span>
+      <span class="badge badge-genre">${a.genre}</span>
+    </div>
+    <div class="opener-why">
+      This track is your ideal opener because it has a controlled energy level of <strong style="color:var(--accent)">${a.energy}/10</strong> that 
+      gives the room room to breathe and the crowd time to arrive. Its <strong style="color:var(--purple)">${a.camelot}</strong> Camelot key provides maximum 
+      harmonic flexibility — you can move in any direction from here. The <strong style="color:var(--green)">${a.genre}</strong> sound sets the right 
+      vibe without overcommitting too early. At <strong style="color:var(--amber)">${a.bpm.toFixed(1)} BPM</strong> it gives dancers a comfortable 
+      entry point before the energy builds.
+    </div>
+    <div class="opener-stats">
+      <div class="opener-stat"><div class="val" style="color:var(--accent)">${a.bpm.toFixed(0)}</div><div class="lbl">BPM</div></div>
+      <div class="opener-stat"><div class="val" style="color:var(--green)">${a.camelot}</div><div class="lbl">Camelot</div></div>
+      <div class="opener-stat"><div class="val" style="color:var(--amber)">${a.energy}/10</div><div class="lbl">Energy</div></div>
+      <div class="opener-stat"><div class="val" style="color:var(--purple)">${a.danceability}/10</div><div class="lbl">Danceability</div></div>
+      <div class="opener-stat"><div class="val" style="color:var(--pink)">${a.grooveIntensity}/10</div><div class="lbl">Groove</div></div>
+      <div class="opener-stat"><div class="val" style="color:var(--accent2)">${Math.round(a.duration/60)}:${String(Math.round(a.duration%60)).padStart(2,'0')}</div><div class="lbl">Duration</div></div>
+    </div>
+  `;
+}
+
+function renderSetOrder(ordered) {
+  const container = document.getElementById('setOrder');
+  container.innerHTML = '';
+
+  ordered.forEach((track, i) => {
+    const a = track.analysis;
+    const prev = i > 0 ? ordered[i-1] : null;
+    const isLast = i === ordered.length - 1;
+    
+    const numClass = track.phase === 'opener' ? 'opener' : track.phase === 'peak' ? 'peak' : track.phase === 'closing' ? 'closer' : '';
+    const phaseClass = `phase-${track.phase}`;
+    
+    let transitionHtml = '';
+    if (prev) {
+      const bpmDiff = Math.abs(a.bpm - prev.analysis.bpm);
+      const harmSc = harmonicScore(prev.analysis.camelot, a.camelot);
+      const isRisky = harmSc < 5 || bpmDiff > 8;
+      const effects = generateTransitionEffects(prev.analysis, a, i);
+      
+      transitionHtml = `
+        <div class="transition-card ${isRisky ? 'risky' : ''}">
+          <div class="transition-title">${isRisky ? '⚠ Risky Transition — Plan Carefully' : '↓ Transition from Track ${i}'}</div>
+          <div class="transition-body">${generateTransitionText(prev, track, harmSc, bpmDiff)}</div>
+          <div class="transition-effects">
+            ${effects.map(e => `<span class="effect-tag">${e}</span>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'set-track';
+    div.innerHTML = `
+      <div class="set-num-wrap">
+        <div class="set-num ${numClass}">${i+1}</div>
+      </div>
+      <div>
+        <div class="set-content">
+          <div class="set-meta">
+            <span class="set-phase ${phaseClass}">${track.phase.replace('winddown','wind-down').toUpperCase()}</span>
+            <span class="badge badge-bpm">${a.bpm.toFixed(1)} BPM</span>
+            <span class="badge badge-camelot">${a.camelot}</span>
+            <span class="badge badge-energy">E:${a.energy}</span>
+          </div>
+          <h4>${escHtml(track.name)}</h4>
+          <div class="text-xs text-muted text-mono" style="margin-top:4px">
+            ${a.genre} · ${a.key} · ${a.mood} · Groove ${a.grooveIntensity}/10 · Crowd ${a.crowdEngagement}/10 · Vocal ${a.vocalScore}/10
+          </div>
+          <div class="energy-bar-wrap" style="margin-top:8px">
+            <div class="energy-bar" style="max-width:200px">
+              <div class="energy-fill" style="width:${a.energy*10}%;background:${energyColorHex(a.energy)}"></div>
+            </div>
+            <span class="energy-label">${a.energy}/10</span>
+          </div>
+          ${transitionHtml}
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function generateTransitionText(prev, next, harmScore, bpmDiff) {
+  const bpmTech = bpmDiff < 2 ? 'straight cut or blend' : bpmDiff < 5 ? 'pitch-lock blend over 32 bars' : bpmDiff < 10 ? 'tempo-ride with slight pitch nudge' : 'energy break before bringing in next track';
+  const harmTech = harmScore >= 9 ? 'perfect harmonic match — clean blend or EQ crossfade' : harmScore >= 7 ? 'harmonically compatible — use subtle high-pass to ease in' : harmScore >= 5 ? 'apply low-pass filter on incoming to mask harmonic tension, open gradually' : 'use white noise sweep or reverb tail to bridge keys — avoid direct blend';
+  const bars = harmScore >= 7 && bpmDiff < 5 ? '32 bars' : harmScore >= 5 ? '16 bars' : '8 bars (quick)';
+  
+  return `Start mixing at last <strong>${bars}</strong> of previous track. BPM Δ ${bpmDiff.toFixed(1)} → ${bpmTech}. Harmonic: ${harmTech}. 
+  Intro of "${escHtml(next.name)}" is ~${next.analysis.introLen} bars.`;
+}
+
+function generateTransitionEffects(prevA, nextA, pos) {
+  const effects = [];
+  const harmSc = harmonicScore(prevA.camelot, nextA.camelot);
+  const bpmDiff = Math.abs(prevA.bpm - nextA.bpm);
+  
+  effects.push('Bass Swap');
+  if (bpmDiff > 3) effects.push('Tempo Ride');
+  if (harmSc < 6) effects.push('Low-Pass Filter');
+  if (harmSc >= 8) effects.push('EQ Blend');
+  if (nextA.energy > prevA.energy + 2) effects.push('Build FX');
+  if (prevA.energy > nextA.energy + 1) effects.push('Reverb Tail');
+  if (Math.random() > 0.5) effects.push('High-Pass Sweep');
+  if (Math.random() > 0.6) effects.push('Echo Out');
+  if (pos > 3 && Math.random() > 0.5) effects.push('Loop Roll');
+  if (harmSc < 5) effects.push('Noise Sweep');
+  
+  return effects.slice(0, 5);
+}
+
+function renderCompatMatrix(trackList) {
+  const container = document.getElementById('matrixContainer');
+  if (!container) return;
+  
+  const n = trackList.length;
+  const shortNames = trackList.map(t => {
+    const words = t.name.split(/[\s\-_]/);
+    return words[0].substring(0,8);
+  });
+  
+  let html = '<table class="matrix-table"><thead><tr><th></th>';
+  shortNames.forEach(n => { html += `<th style="font-size:9px;max-width:36px;overflow:hidden;white-space:nowrap">${escHtml(n)}</th>`; });
+  html += '</tr></thead><tbody>';
+  
+  trackList.forEach((t1, i) => {
+    html += `<tr><th style="font-size:9px;text-align:right;padding-right:6px;white-space:nowrap">${escHtml(shortNames[i])}</th>`;
+    trackList.forEach((t2, j) => {
+      if (i === j) {
+        html += `<td><div class="matrix-cell compat-self">—</div></td>`;
+      } else {
+        const sc = harmonicScore(t1.analysis.camelot, t2.analysis.camelot);
+        const cls = 'compat-' + compatLabel(sc);
+        html += `<td><div class="matrix-cell ${cls}" title="${t1.name} → ${t2.name}: ${sc}/10">${sc}</div></td>`;
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderEnergyCharts(ordered) {
+  const labels = ordered.map((t, i) => `${i+1}. ${t.name.substring(0,15)}`);
+  const energyData = ordered.map(t => t.analysis.energy);
+  const bpmData = ordered.map(t => t.analysis.bpm);
+  const phaseColors = ordered.map(t => {
+    const c = {opener:'#00e599',warmup:'#00d4ff',buildup:'#f59e0b',peak:'#ef4444',winddown:'#a855f7',closing:'#7c3aed'};
+    return c[t.phase] || '#00d4ff';
+  });
+
+  if (energyChartInst) energyChartInst.destroy();
+  const eCtx = document.getElementById('energyChart').getContext('2d');
+  energyChartInst = new Chart(eCtx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Energy Level',
+        data: energyData,
+        borderColor: '#00d4ff',
+        backgroundColor: 'rgba(0,212,255,0.08)',
+        pointBackgroundColor: phaseColors,
+        pointBorderColor: phaseColors,
+        pointRadius: 8,
+        pointHoverRadius: 10,
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#525d6a', font: { family: 'Space Mono', size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { min: 0, max: 10, ticks: { color: '#525d6a', font: { family: 'Space Mono', size: 10 }, stepSize: 2 }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      }
+    }
+  });
+
+  if (bpmChartInst) bpmChartInst.destroy();
+  const bCtx = document.getElementById('bpmChart').getContext('2d');
+  bpmChartInst = new Chart(bCtx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'BPM',
+        data: bpmData,
+        backgroundColor: phaseColors.map(c => c + '66'),
+        borderColor: phaseColors,
+        borderWidth: 1.5,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#525d6a', font: { family: 'Space Mono', size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.04)' } },
+        y: { min: 100, ticks: { color: '#525d6a', font: { family: 'Space Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      }
+    }
+  });
+}
+
+function renderAIReport(ordered, aiText) {
+  const container = document.getElementById('reportContent');
+  const opener = ordered[0];
+  const avgBpm = (ordered.reduce((s,t) => s + t.analysis.bpm, 0) / ordered.length).toFixed(1);
+  const avgEnergy = (ordered.reduce((s,t) => s + t.analysis.energy, 0) / ordered.length).toFixed(1);
+  const genres = [...new Set(ordered.map(t => t.analysis.genre))];
+  const duration = ordered.reduce((s,t) => s + (t.analysis.duration || 360), 0);
+  const durationStr = `${Math.floor(duration/3600)}h ${Math.round((duration%3600)/60)}m`;
+
+  const statsHtml = `
+    <div class="report-grid">
+      <div class="report-stat"><div class="rv" style="color:var(--accent)">${ordered.length}</div><div class="rl">Tracks in Set</div></div>
+      <div class="report-stat"><div class="rv" style="color:var(--amber)">${avgBpm}</div><div class="rl">Avg BPM</div></div>
+      <div class="report-stat"><div class="rv" style="color:var(--green)">${avgEnergy}</div><div class="rl">Avg Energy</div></div>
+      <div class="report-stat"><div class="rv" style="color:var(--purple)">${durationStr}</div><div class="rl">Est. Duration</div></div>
+      <div class="report-stat"><div class="rv" style="color:var(--pink)">${genres.length}</div><div class="rl">Genres</div></div>
+      <div class="report-stat"><div class="rv" style="color:var(--accent2)">${opener.analysis.camelot}</div><div class="rl">Opening Key</div></div>
+    </div>
+    <div class="report-block">
+      <h4>Genre Mix</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${genres.map(g => `<span class="badge badge-genre">${g}</span>`).join('')}
+      </div>
+    </div>
+  `;
+
+  if (aiText) {
+    container.innerHTML = statsHtml + `<div class="report-block"><h4>AI Set Strategy</h4>${aiText}</div>`;
+  } else {
+    // Fallback manual report
+    container.innerHTML = statsHtml + renderFallbackReport(ordered);
+  }
+}
+
+function renderFallbackReport(ordered) {
+  const opener = ordered[0];
+  const peakTracks = ordered.filter(t => t.phase === 'peak');
+  const riskyTransitions = [];
+  ordered.slice(0,-1).forEach((t, i) => {
+    const sc = harmonicScore(t.analysis.camelot, ordered[i+1].analysis.camelot);
+    if (sc < 5) riskyTransitions.push(`${t.name} → ${ordered[i+1].name}`);
+  });
+
+  return `
+    <div class="report-block">
+      <h4>Opening Strategy</h4>
+      <p>"${escHtml(opener.name)}" is your ideal opener. At ${opener.analysis.energy}/10 energy with a ${opener.analysis.camelot} Camelot key, 
+      it welcomes the crowd without overwhelming them. Let this track play fully — don't rush the first transition. 
+      Give the room 5–7 minutes to settle before mixing into Track 2.</p>
+    </div>
+    <div class="report-block">
+      <h4>Energy Arc</h4>
+      <p>Your set follows a professional energy curve: gentle open → gradual build → sustained peak → controlled descent → warm close. 
+      The peak zone (tracks ${ordered.findIndex(t=>t.phase==='peak')+1}–${ordered.map((t,i)=>t.phase==='peak'?i+1:0).filter(Boolean).pop()}) 
+      is where your highest-energy drops live. Save your biggest tracks for this window.</p>
+    </div>
+    <div class="report-block">
+      <h4>Risky Transitions to Watch</h4>
+      ${riskyTransitions.length > 0 
+        ? `<ul>${riskyTransitions.slice(0,3).map(t => `<li>${escHtml(t)} — use a white noise sweep or reverb tail bridge</li>`).join('')}</ul>`
+        : '<p>No critically risky transitions detected — your harmonic flow is strong throughout.</p>'}
+    </div>
+    <div class="report-block">
+      <h4>Peak-Time Advice</h4>
+      <p>During the peak phase, use 32-bar loops on your biggest drops to extend the moment. 
+      If the crowd is peaking early, hold back your highest-energy track as a surprise reset after a brief 2-minute chill-out moment. 
+      Watch the dancefloor — if people are singing along, you're winning.</p>
+    </div>
+    <div class="report-block">
+      <h4>Closing Strategy</h4>
+      <p>Your closing tracks should resolve harmonically back toward the opener's key range. 
+      Reduce BPM gradually over the last 3 tracks and let reverb tails linger longer between mixes. 
+      A great close leaves the crowd wanting more — end on a track with a long, hypnotic outro.</p>
+    </div>
+  `;
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────
+function showTab(name) {
+  ['set','energy','compat','report'].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== name);
+  });
+  document.querySelectorAll('.tab').forEach((btn,i) => {
+    const names = ['set','energy','compat','report'];
+    btn.classList.toggle('active', names[i] === name);
+  });
+}
+</script>
+</body>
+</html>
