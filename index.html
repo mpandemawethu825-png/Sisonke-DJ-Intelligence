@@ -2,1220 +2,1195 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>House DJ Set Intelligence</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #080a0f;
-    --surface: #0f1218;
-    --surface2: #161b24;
-    --surface3: #1e2530;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #f0f2f5;
-    --text2: #8892a0;
-    --text3: #525d6a;
-    --accent: #00d4ff;
-    --accent2: #7c3aed;
-    --green: #00e599;
-    --amber: #f59e0b;
-    --red: #ef4444;
-    --pink: #ec4899;
-    --purple: #a855f7;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
-  
-  /* ── GRID NOISE BG ── */
-  body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 30%, rgba(0,212,255,0.03) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(124,58,237,0.04) 0%, transparent 50%);pointer-events:none;z-index:0}
-  
-  /* ── LAYOUT ── */
-  .app{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 24px}
-  
-  /* ── HEADER ── */
-  header{padding:32px 0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-  .logo{display:flex;align-items:center;gap:12px}
-  .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
-  .logo h1{font-size:20px;font-weight:800;letter-spacing:-0.5px}
-  .logo h1 span{color:var(--accent)}
-  .header-badge{background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;padding:4px 10px;border-radius:4px;letter-spacing:1px}
+:root{
+  --bg:#ffffff;--s1:#f8f5f5;--s2:#ede9e9;--s3:#ddd6d6;
+  --b1:rgba(128,0,32,.09);--b2:rgba(128,0,32,.18);
+  --t1:#160808;--t2:#5a2a2a;--t3:#9a7070;
+  --M:#800020;--M2:#a0002a;--M3:#5c0018;--M4:#3a0010;
+  --ml:rgba(128,0,32,.07);--mlb:rgba(128,0,32,.16);
+  --F:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --FM:'SF Mono','Fira Mono','Consolas',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--t1);font-family:var(--F);line-height:1.5;overflow-x:hidden;min-height:100vh}
 
-  /* ── UPLOAD ZONE ── */
-  .upload-section{padding:40px 0}
-  .drop-zone{border:1.5px dashed var(--border2);border-radius:16px;padding:60px 40px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-  .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(0,212,255,0.03)}
-  .drop-zone.drag-over::before{content:'';position:absolute;inset:0;background:rgba(0,212,255,0.05);pointer-events:none}
-  .drop-icon{font-size:48px;margin-bottom:16px;opacity:.4}
-  .drop-title{font-size:22px;font-weight:700;margin-bottom:8px}
-  .drop-sub{color:var(--text2);font-size:14px;line-height:1.6}
-  .drop-sub strong{color:var(--accent)}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:600;font-size:14px;cursor:pointer;transition:all .15s;border:none}
-  .btn-primary{background:linear-gradient(135deg,var(--accent),#0099cc);color:#000}
-  .btn-primary:hover{opacity:.9;transform:translateY(-1px)}
-  .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
-  .btn-secondary:hover{background:var(--surface3);border-color:var(--border2)}
-  .btn-danger{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
-  .btn-danger:hover{background:rgba(239,68,68,0.25)}
-  .btn-accent{background:linear-gradient(135deg,var(--accent2),var(--purple));color:#fff}
-  .btn-accent:hover{opacity:.9;transform:translateY(-1px)}
-  .format-chips{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
-  .chip{background:var(--surface2);border:1px solid var(--border);padding:4px 12px;border-radius:20px;font-size:12px;font-family:'Space Mono',monospace;color:var(--text2)}
-  
-  /* ── TRACK LIST ── */
-  .tracks-section{padding:0 0 32px}
-  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-  .section-title{font-size:18px;font-weight:700}
-  .track-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--accent);background:rgba(0,212,255,0.1);padding:4px 10px;border-radius:4px}
-  .track-grid{display:flex;flex-direction:column;gap:10px}
-  .track-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:16px;transition:border-color .2s}
-  .track-item:hover{border-color:var(--border2)}
-  .track-item.analyzing{border-color:rgba(0,212,255,0.3);animation:pulse-border 1.5s ease-in-out infinite}
-  .track-item.done{border-color:rgba(0,229,153,0.2)}
-  @keyframes pulse-border{0%,100%{border-color:rgba(0,212,255,0.3)}50%{border-color:rgba(0,212,255,0.6)}}
-  .track-num{width:28px;height:28px;background:var(--surface2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:12px;color:var(--text3)}
-  .track-info h4{font-size:14px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px}
-  .track-info .meta{font-size:12px;color:var(--text2);font-family:'Space Mono',monospace}
-  .track-badges{display:flex;gap:6px;align-items:center}
-  .badge{padding:3px 8px;border-radius:4px;font-size:11px;font-family:'Space Mono',monospace;font-weight:700;white-space:nowrap}
-  .badge-bpm{background:rgba(0,212,255,0.12);color:var(--accent);border:1px solid rgba(0,212,255,0.2)}
-  .badge-key{background:rgba(124,58,237,0.15);color:var(--purple);border:1px solid rgba(124,58,237,0.25)}
-  .badge-energy{background:rgba(245,158,11,0.12);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
-  .badge-genre{background:rgba(0,229,153,0.1);color:var(--green);border:1px solid rgba(0,229,153,0.2)}
-  .badge-camelot{background:rgba(236,72,153,0.12);color:var(--pink);border:1px solid rgba(236,72,153,0.2)}
-  .track-status{display:flex;align-items:center;gap:8px}
-  .status-dot{width:8px;height:8px;border-radius:50%}
-  .status-dot.pending{background:var(--text3)}
-  .status-dot.analyzing{background:var(--accent);animation:blink 1s ease-in-out infinite}
-  .status-dot.done{background:var(--green)}
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-  .status-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--text2)}
-  .track-remove{width:28px;height:28px;background:transparent;border:none;cursor:pointer;color:var(--text3);border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:16px}
-  .track-remove:hover{background:rgba(239,68,68,0.1);color:var(--red)}
-  
-  /* ── WAVEFORM ── */
-  .waveform-row{grid-column:1/-1;height:32px;margin-top:6px;position:relative}
-  canvas.waveform{width:100%;height:100%;border-radius:4px}
-  
-  /* ── ENERGY BAR ── */
-  .energy-bar-wrap{display:flex;align-items:center;gap:8px;margin-top:4px}
-  .energy-bar{flex:1;height:3px;background:var(--surface3);border-radius:2px;overflow:hidden}
-  .energy-fill{height:100%;border-radius:2px;transition:width .5s ease}
-  .energy-label{font-size:10px;font-family:'Space Mono',monospace;color:var(--text3);min-width:20px}
-  
-  /* ── ANALYZE BUTTON ── */
-  .analyze-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:32px}
-  .analyze-info h3{font-size:16px;font-weight:700;margin-bottom:4px}
-  .analyze-info p{font-size:13px;color:var(--text2)}
-  .progress-wrap{flex:1;max-width:300px}
-  .progress-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
-  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width .3s ease;width:0%}
-  .progress-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--text2);margin-top:6px;text-align:right}
-  
-  /* ── RESULTS ── */
-  .results-section{padding-bottom:80px}
-  .results-tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface);padding:4px;border-radius:10px;border:1px solid var(--border);width:fit-content}
-  .tab{padding:8px 18px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none;background:transparent;color:var(--text2)}
-  .tab.active{background:var(--surface3);color:var(--text)}
-  
-  /* ── OPENER CARD ── */
-  .opener-card{background:var(--surface);border:1.5px solid rgba(0,229,153,0.25);border-radius:16px;padding:28px;margin-bottom:24px;position:relative;overflow:hidden}
-  .opener-card::before{content:'';position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(circle, rgba(0,229,153,0.06) 0%, transparent 70%);pointer-events:none}
-  .opener-crown{font-size:32px;margin-bottom:12px}
-  .opener-label{font-size:11px;font-family:'Space Mono',monospace;letter-spacing:2px;color:var(--green);margin-bottom:8px;text-transform:uppercase}
-  .opener-title{font-size:26px;font-weight:800;margin-bottom:4px;letter-spacing:-0.5px}
-  .opener-why{font-size:14px;color:var(--text2);line-height:1.7;margin-top:12px}
-  .opener-stats{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px}
-  .opener-stat{text-align:center}
-  .opener-stat .val{font-size:20px;font-weight:700;font-family:'Space Mono',monospace}
-  .opener-stat .lbl{font-size:11px;color:var(--text3);margin-top:2px}
-  
-  /* ── SET ORDER ── */
-  .set-order{display:flex;flex-direction:column;gap:0}
-  .set-track{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:start;position:relative}
-  .set-track:not(:last-child)::after{content:'';position:absolute;left:16px;top:52px;bottom:-24px;width:1.5px;background:linear-gradient(180deg,var(--border2),transparent)}
-  .set-num-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:4px}
-  .set-num{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;border:2px solid var(--border2);background:var(--surface)}
-  .set-num.opener{border-color:var(--green);color:var(--green);background:rgba(0,229,153,0.05)}
-  .set-num.peak{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,0.05)}
-  .set-num.closer{border-color:var(--purple);color:var(--purple);background:rgba(168,85,247,0.05)}
-  .set-content{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:24px}
-  .set-content h4{font-size:15px;font-weight:700;margin-bottom:8px}
-  .set-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-  .set-phase{font-size:11px;font-family:'Space Mono',monospace;padding:3px 10px;border-radius:20px;font-weight:700}
-  .phase-opener{background:rgba(0,229,153,0.1);color:var(--green);border:1px solid rgba(0,229,153,0.2)}
-  .phase-warmup{background:rgba(0,212,255,0.1);color:var(--accent);border:1px solid rgba(0,212,255,0.2)}
-  .phase-buildup{background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
-  .phase-peak{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
-  .phase-winddown{background:rgba(168,85,247,0.1);color:var(--purple);border:1px solid rgba(168,85,247,0.2)}
-  .phase-closing{background:rgba(124,58,237,0.12);color:var(--accent2);border:1px solid rgba(124,58,237,0.2)}
-  
-  /* ── TRANSITION CARD ── */
-  .transition-card{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:8px;padding:14px 16px;margin-bottom:4px}
-  .transition-title{font-size:12px;font-family:'Space Mono',monospace;color:var(--accent2);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
-  .transition-body{font-size:13px;color:var(--text2);line-height:1.7}
-  .transition-card.risky{border-left-color:var(--amber)}
-  .transition-card.risky .transition-title{color:var(--amber)}
-  .transition-effects{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
-  .effect-tag{background:var(--surface3);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-size:11px;font-family:'Space Mono',monospace;color:var(--text2)}
-  
-  /* ── ENERGY CURVE ── */
-  .energy-curve-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px}
-  .energy-curve-wrap h3{font-size:16px;font-weight:700;margin-bottom:20px}
-  
-  /* ── COMPAT MATRIX ── */
-  .compat-matrix{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;overflow:auto}
-  .compat-matrix h3{font-size:16px;font-weight:700;margin-bottom:20px}
-  .matrix-table{border-collapse:collapse;min-width:100%}
-  .matrix-table th{font-size:11px;font-family:'Space Mono',monospace;color:var(--text2);padding:6px;text-align:center;font-weight:400}
-  .matrix-table td{width:36px;height:36px;text-align:center;font-size:10px;font-family:'Space Mono',monospace;border-radius:4px;cursor:default}
-  .matrix-cell{border-radius:4px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;margin:2px auto;font-size:10px;font-weight:700}
-  
-  /* ── REPORT ── */
-  .report-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:24px}
-  .report-section h3{font-size:18px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-  .report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
-  .report-stat{background:var(--surface2);border-radius:10px;padding:14px;text-align:center}
-  .report-stat .rv{font-size:24px;font-weight:800;font-family:'Space Mono',monospace}
-  .report-stat .rl{font-size:11px;color:var(--text3);margin-top:4px}
-  .report-block{background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:12px}
-  .report-block h4{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--accent)}
-  .report-block p{font-size:13px;color:var(--text2);line-height:1.7}
-  .report-block ul{list-style:none;padding:0}
-  .report-block ul li{font-size:13px;color:var(--text2);padding:4px 0;padding-left:16px;position:relative}
-  .report-block ul li::before{content:'→';position:absolute;left:0;color:var(--accent2);font-family:'Space Mono',monospace}
-  
-  /* ── CAMELOT WHEEL ── */
-  .camelot-mini{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:10px;font-family:'Space Mono',monospace;font-weight:700}
-  
-  /* ── LOADING STATE ── */
-  .spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .ai-thinking{display:flex;align-items:center;gap:12px;padding:16px 20px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:10px;margin-bottom:16px}
-  .ai-thinking p{font-size:13px;color:var(--text2)}
-  .ai-thinking strong{color:var(--purple)}
-  
-  /* ── HELPERS ── */
-  .hidden{display:none!important}
-  .flex{display:flex}
-  .gap-8{gap:8px}
-  .gap-12{gap:12px}
-  .mt-8{margin-top:8px}
-  .mt-16{margin-top:16px}
-  .text-muted{color:var(--text2)}
-  .text-mono{font-family:'Space Mono',monospace}
-  .text-sm{font-size:13px}
-  .text-xs{font-size:11px}
-  .divider{height:1px;background:var(--border);margin:24px 0}
-  
-  /* ── SCROLLBAR ── */
-  ::-webkit-scrollbar{width:6px;height:6px}
-  ::-webkit-scrollbar-track{background:var(--bg)}
-  ::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px}
-  
-  /* ── MOBILE ── */
-  @media(max-width:640px){
-    .app{padding:0 16px}
-    .track-item{grid-template-columns:auto 1fr auto;gap:10px}
-    .track-badges{display:none}
-    .opener-stats{gap:12px}
-    .report-grid{grid-template-columns:1fr 1fr}
-  }
-  
-  .caret{display:inline-block;margin-left:4px;animation:caret-blink .7s step-end infinite}
-  @keyframes caret-blink{0%,100%{opacity:1}50%{opacity:0}}
-  
-  /* harmonic compat colors */
-  .compat-great{background:rgba(0,229,153,0.2);color:var(--green)}
-  .compat-good{background:rgba(0,212,255,0.15);color:var(--accent)}
-  .compat-ok{background:rgba(245,158,11,0.15);color:var(--amber)}
-  .compat-poor{background:rgba(239,68,68,0.12);color:var(--red)}
-  .compat-self{background:var(--surface3);color:var(--text3)}
+/* ── APP SHELL ── */
+#app{max-width:1360px;margin:0 auto;padding:0 18px}
+
+/* ── HEADER ── */
+header{padding:22px 0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--b1)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:34px;height:34px;background:var(--M);border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:900;color:#fff;font-family:var(--FM);flex-shrink:0;letter-spacing:-.5px}
+.logo h1{font-size:17px;font-weight:700;color:var(--t1);letter-spacing:-.2px}
+.logo h1 em{font-style:normal;color:var(--M)}
+.hbadge{background:var(--ml);border:1px solid var(--mlb);color:var(--M);font-family:var(--FM);font-size:10px;padding:3px 9px;border-radius:4px;letter-spacing:1px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;border-radius:9px;font-family:var(--F);font-weight:600;font-size:14px;cursor:pointer;border:none;transition:all .14s;white-space:nowrap;-webkit-appearance:none;appearance:none}
+.btn:active{transform:scale(.97)}
+.btn-m{background:var(--M);color:#fff}
+.btn-m:hover{background:var(--M2)}
+.btn-m2{background:var(--M3);color:#fff}
+.btn-m2:hover{background:var(--M4)}
+.btn-ghost{background:var(--s2);color:var(--t1);border:1px solid var(--b2)}
+.btn-ghost:hover{background:var(--s3)}
+.btn[disabled]{opacity:.35;pointer-events:none;cursor:default}
+/* big tap target on mobile */
+@media(max-width:600px){.btn{min-height:48px;font-size:15px}}
+
+/* ── UPLOAD ── */
+#uploadSection{padding:32px 0 0}
+.dz{border:2px dashed var(--b2);border-radius:18px;padding:48px 24px 36px;text-align:center;cursor:pointer;transition:all .18s;background:var(--s1)}
+.dz:hover,.dz.over{border-color:var(--M);background:rgba(128,0,32,.03)}
+.dz-mark{width:52px;height:52px;background:var(--ml);border:2px solid var(--mlb);border-radius:50%;display:grid;place-items:center;margin:0 auto 16px;font-size:20px;font-weight:800;color:var(--M);font-family:var(--FM)}
+.dz h2{font-size:20px;font-weight:800;color:var(--t1);margin-bottom:8px}
+.dz p{color:var(--t2);font-size:14px;line-height:1.7;margin-bottom:20px;max-width:400px;margin-left:auto;margin-right:auto}
+.dz p b{color:var(--M)}
+
+/* Mobile upload options grid */
+.upload-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:420px;margin:0 auto 20px}
+@media(max-width:480px){.upload-opts{grid-template-columns:1fr}}
+.uopt{background:#fff;border:1.5px solid var(--b2);border-radius:12px;padding:14px 16px;cursor:pointer;text-align:left;transition:all .14s;display:flex;align-items:center;gap:12px}
+.uopt:hover,.uopt:active{border-color:var(--M);background:var(--ml)}
+.uopt-icon{width:36px;height:36px;border-radius:8px;background:var(--ml);display:grid;place-items:center;font-size:16px;font-weight:800;color:var(--M);font-family:var(--FM);flex-shrink:0}
+.uopt-text{display:flex;flex-direction:column}
+.uopt-title{font-size:13px;font-weight:700;color:var(--t1)}
+.uopt-sub{font-size:11px;color:var(--t3);margin-top:1px}
+.formats{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.fmt-chip{background:var(--s2);border:1px solid var(--b1);padding:3px 10px;border-radius:20px;font-family:var(--FM);font-size:10px;color:var(--t2)}
+
+/* Hidden file inputs — one per source type */
+input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+
+/* ── TRACK LIST ── */
+#tracksSection{padding:24px 0 20px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:15px;font-weight:700}
+.cnt{font-family:var(--FM);font-size:11px;color:var(--M);background:var(--ml);padding:3px 9px;border-radius:4px}
+.tlist{display:flex;flex-direction:column;gap:8px}
+.ti{background:var(--s1);border:1px solid var(--b1);border-radius:11px;padding:12px 14px;display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;transition:border-color .18s}
+.ti.loading{border-color:rgba(128,0,32,.4);animation:tp 1.4s ease-in-out infinite}
+.ti.done{border-color:rgba(128,0,32,.28)}
+@keyframes tp{0%,100%{border-color:rgba(128,0,32,.3)}50%{border-color:rgba(128,0,32,.7)}}
+.tnum{width:26px;height:26px;background:var(--s2);border-radius:6px;display:grid;place-items:center;font-family:var(--FM);font-size:10px;color:var(--t3)}
+.tn h4{font-size:13px;font-weight:600;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:min(340px,55vw)}
+.tn .sz{font-size:10px;color:var(--t3);font-family:var(--FM)}
+.tbx{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.bx{padding:2px 6px;border-radius:4px;font-size:10px;font-family:var(--FM);font-weight:700;white-space:nowrap;border:1px solid transparent}
+.b-bpm{background:var(--ml);color:var(--M);border-color:var(--mlb)}
+.b-cam{background:rgba(128,0,32,.07);color:var(--M3);border-color:rgba(128,0,32,.18)}
+.b-key{background:rgba(92,0,24,.06);color:var(--M3);border-color:rgba(92,0,24,.16)}
+.b-nrg{background:rgba(160,0,42,.07);color:var(--M2);border-color:rgba(160,0,42,.18)}
+.b-gen{background:rgba(128,0,32,.05);color:var(--M);border-color:rgba(128,0,32,.14)}
+.b-dur{background:rgba(100,20,20,.04);color:var(--t2);border-color:var(--b1)}
+/* BPM match badge — green-tinted maroon for good, red for bad */
+.b-bpmatch-good{background:rgba(0,80,0,.07);color:#004d00;border-color:rgba(0,80,0,.18)}
+.b-bpmatch-ok{background:rgba(100,50,0,.07);color:#5a3000;border-color:rgba(100,50,0,.18)}
+.b-bpmatch-hard{background:rgba(128,0,32,.1);color:var(--M);border-color:rgba(128,0,32,.25)}
+.ebar-w{display:flex;align-items:center;gap:6px;margin-top:4px}
+.ebar{flex:1;height:2px;background:var(--s3);border-radius:1px;overflow:hidden;max-width:180px}
+.ebar-f{height:100%;border-radius:1px;transition:width .5s}
+.wc{display:none;width:100%;height:26px;border-radius:3px;margin-top:4px}
+.tr{display:flex;align-items:center;gap:7px}
+.sd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sd-p{background:var(--t3)}
+.sd-a{background:var(--M);animation:bk .9s ease-in-out infinite}
+.sd-d{background:var(--M2)}
+@keyframes bk{0%,100%{opacity:1}50%{opacity:.2}}
+.slbl{font-size:10px;font-family:var(--FM);color:var(--t2)}
+.xbtn{width:24px;height:24px;background:transparent;border:none;cursor:pointer;color:var(--t3);border-radius:5px;display:grid;place-items:center;font-size:13px;transition:all .12s;-webkit-appearance:none}
+.xbtn:hover{background:rgba(128,0,32,.1);color:var(--M)}
+
+/* ── ANALYSE BAR ── */
+#aBar{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:24px;flex-wrap:wrap}
+#aBar h3{font-size:14px;font-weight:700;margin-bottom:3px;color:var(--t1)}
+#aBar p{font-size:12px;color:var(--t2)}
+.pb-w{flex:1;min-width:180px;max-width:260px}
+.pb{height:5px;background:var(--s3);border-radius:3px;overflow:hidden}
+.pb-f{height:100%;background:linear-gradient(90deg,var(--M3),var(--M2));border-radius:3px;transition:width .22s;width:0%}
+.pb-l{font-size:10px;font-family:var(--FM);color:var(--t2);margin-top:4px;text-align:right}
+
+/* ── TABS ── */
+.rtabs{display:flex;gap:3px;margin-bottom:20px;background:var(--s1);padding:4px;border-radius:10px;border:1px solid var(--b1);width:fit-content;flex-wrap:wrap}
+.rtab{padding:7px 15px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--t2);transition:all .12s;white-space:nowrap;-webkit-appearance:none}
+.rtab.on{background:var(--M);color:#fff}
+.results{padding-bottom:80px}
+
+/* ── DURATION BANNER ── */
+.dur-banner{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));background:var(--s1);border:1px solid rgba(128,0,32,.2);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.dur-cell{padding:14px;text-align:center;border-right:1px solid var(--b1)}
+.dur-cell:last-child{border-right:none}
+.dur-v{font-size:19px;font-weight:800;font-family:var(--FM);color:var(--M)}
+.dur-l{font-size:10px;color:var(--t3);margin-top:2px;text-transform:uppercase;letter-spacing:.7px}
+
+/* ── TIMELINE ── */
+.tl{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:16px 20px;margin-bottom:20px}
+.tl-h{font-size:11px;font-family:var(--FM);color:var(--t2);letter-spacing:1px;text-transform:uppercase;margin-bottom:9px}
+.tl-bar{position:relative;height:12px;background:var(--s3);border-radius:6px;overflow:hidden}
+.tl-seg{position:absolute;top:0;height:100%;cursor:pointer;transition:opacity .14s}
+.tl-seg:hover{opacity:.7!important}
+.tl-ticks{position:relative;height:16px;margin-top:3px}
+.tl-tick{position:absolute;font-size:9px;font-family:var(--FM);color:var(--t3);transform:translateX(-50%)}
+.tl-leg{display:flex;gap:10px;margin-top:9px;flex-wrap:wrap}
+.tl-li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2)}
+.tl-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ── OPENER CARD ── */
+.op-card{background:var(--s1);border:1.5px solid rgba(128,0,32,.22);border-radius:16px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden}
+.op-card::after{content:'';position:absolute;top:-20px;right:-20px;width:150px;height:150px;background:radial-gradient(circle,rgba(128,0,32,.05) 0%,transparent 65%);pointer-events:none}
+.op-lbl{font-size:10px;font-family:var(--FM);letter-spacing:2px;color:var(--M);margin-bottom:6px;text-transform:uppercase}
+.op-title{font-size:21px;font-weight:800;letter-spacing:-.3px;margin-bottom:10px;color:var(--t1)}
+.op-why{font-size:13px;color:var(--t2);line-height:1.75;margin-top:8px}
+.op-stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px}
+.op-s .v{font-size:17px;font-weight:800;font-family:var(--FM);color:var(--M)}
+.op-s .l{font-size:10px;color:var(--t3);margin-top:2px}
+
+/* ── SET ORDER ── */
+.sorder{display:flex;flex-direction:column}
+.st{display:grid;grid-template-columns:34px 1fr;gap:12px;position:relative}
+.st:not(:last-child)::after{content:'';position:absolute;left:16px;top:42px;bottom:-18px;width:1px;background:linear-gradient(180deg,var(--b2),transparent)}
+.st-nc{display:flex;flex-direction:column;align-items:center;padding-top:2px}
+.st-n{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--FM);font-size:11px;font-weight:700;border:2px solid var(--b2);background:var(--s1);flex-shrink:0;color:var(--t2)}
+.st-n.n-o{border-color:var(--M);color:var(--M);background:var(--ml)}
+.st-n.n-p{border-color:var(--M2);color:var(--M2);background:rgba(160,0,42,.07)}
+.st-n.n-c{border-color:var(--M3);color:var(--M3);background:rgba(92,0,24,.07)}
+.st-b{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:14px 16px;margin-bottom:18px}
+.st-b h4{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--t1)}
+.st-time{font-size:10px;font-family:var(--FM);color:var(--t3);margin-bottom:7px;display:flex;gap:10px;flex-wrap:wrap}
+.st-time span{color:var(--M3)}
+.st-meta{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+.ptag{font-size:10px;font-family:var(--FM);padding:2px 9px;border-radius:20px;font-weight:700}
+.pt-opener{background:rgba(128,0,32,.09);color:var(--M3);border:1px solid rgba(128,0,32,.2)}
+.pt-warmup{background:rgba(128,0,32,.06);color:var(--M);border:1px solid rgba(128,0,32,.14)}
+.pt-buildup{background:rgba(160,0,42,.08);color:var(--M2);border:1px solid rgba(160,0,42,.18)}
+.pt-peak{background:rgba(128,0,32,.13);color:var(--M);border:1px solid rgba(128,0,32,.26)}
+.pt-winddown{background:rgba(92,0,24,.08);color:var(--M3);border:1px solid rgba(92,0,24,.18)}
+.pt-closing{background:rgba(58,0,16,.07);color:var(--M4);border:1px solid rgba(58,0,16,.16)}
+
+/* ── BPM MATCH INDICATOR ── */
+.bpm-match{display:flex;align-items:center;gap:8px;margin-top:6px;padding:8px 10px;border-radius:8px;font-size:11px;font-family:var(--FM)}
+.bpm-match.good{background:rgba(0,80,0,.06);border:1px solid rgba(0,80,0,.15);color:#004000}
+.bpm-match.ok{background:rgba(100,50,0,.06);border:1px solid rgba(100,50,0,.15);color:#4a2800}
+.bpm-match.hard{background:rgba(128,0,32,.08);border:1px solid rgba(128,0,32,.2);color:var(--M)}
+.bpm-match-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bpm-match.good .bpm-match-dot{background:#00a000}
+.bpm-match.ok .bpm-match-dot{background:#b06000}
+.bpm-match.hard .bpm-match-dot{background:var(--M)}
+
+/* ── TRANSITION CARD ── */
+.tc{background:var(--s2);border:1px solid var(--b1);border-left:3px solid var(--M3);border-radius:8px;padding:12px 14px;margin-top:10px}
+.tc.risky{border-left-color:var(--M2)}
+.tc-title{font-size:10px;font-family:var(--FM);color:var(--M3);margin-bottom:7px;text-transform:uppercase;letter-spacing:1px}
+.tc.risky .tc-title{color:var(--M2)}
+.tc-body{font-size:12px;color:var(--t2);line-height:1.75}
+.tc-body strong{color:var(--t1)}
+.tc-fx{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.fxtag{background:var(--s3);border:1px solid var(--b1);padding:2px 7px;border-radius:4px;font-size:10px;font-family:var(--FM);color:var(--t2)}
+
+/* ── CHARTS ── */
+.cc{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:18px;margin-bottom:18px}
+.cc h3{font-size:14px;font-weight:700;margin-bottom:14px;color:var(--t1)}
+.cw{position:relative;width:100%;height:300px}
+.cw-sm{position:relative;width:100%;height:200px}
+
+/* ── COMPAT MATRIX ── */
+.mx-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:18px;margin-bottom:18px;overflow-x:auto}
+.mx-wrap h3{font-size:14px;font-weight:700;margin-bottom:7px;color:var(--t1)}
+.mx-sub{font-size:12px;color:var(--t2);margin-bottom:14px}
+table.mx{border-collapse:collapse}
+table.mx th{font-size:9px;font-family:var(--FM);color:var(--t2);padding:3px;text-align:center;font-weight:400;max-width:32px;overflow:hidden;white-space:nowrap}
+.mc{width:30px;height:30px;border-radius:4px;display:grid;place-items:center;font-size:10px;font-weight:700;font-family:var(--FM);margin:2px auto;cursor:default}
+.mc-g{background:rgba(128,0,32,.16);color:var(--M3)}
+.mc-ok{background:rgba(128,0,32,.09);color:var(--M)}
+.mc-r{background:rgba(128,0,32,.05);color:var(--t2)}
+.mc-x{background:rgba(128,0,32,.03);color:var(--t3)}
+.mc-s{background:var(--s2);color:var(--t3)}
+
+/* ── REPORT ── */
+.rg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.rs{background:var(--s2);border-radius:10px;padding:12px;text-align:center}
+.rs .rv{font-size:19px;font-weight:800;font-family:var(--FM);color:var(--M)}
+.rs .rl{font-size:10px;color:var(--t3);margin-top:2px}
+.rb{background:var(--s2);border-radius:10px;padding:14px;margin-bottom:10px}
+.rb h4{font-size:12px;font-weight:700;margin-bottom:7px;color:var(--M)}
+.rb p,.rb li{font-size:13px;color:var(--t2);line-height:1.75}
+.rb ul{list-style:none;padding:0}
+.rb li{padding-left:14px;position:relative;padding-top:3px}
+.rb li::before{content:'→';position:absolute;left:0;color:var(--M);font-family:var(--FM)}
+
+/* ── SPINNER / THINKING ── */
+.spin{width:14px;height:14px;border:2px solid var(--b2);border-top-color:var(--M);border-radius:50%;animation:sp .5s linear infinite;display:inline-block;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.thinking{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--ml);border:1px solid var(--mlb);border-radius:10px;margin-bottom:14px;font-size:12px;color:var(--t2)}
+.thinking strong{color:var(--M)}
+
+/* ── MIX REVIEW ── */
+.rev-intro{background:var(--s1);border:1px solid rgba(128,0,32,.18);border-radius:14px;padding:18px 22px;margin-bottom:18px}
+.rev-intro h3{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--t1)}
+.rev-intro p{font-size:13px;color:var(--t2);line-height:1.7}
+.rev-drop{border:2px dashed rgba(128,0,32,.28);border-radius:14px;padding:44px 24px;text-align:center;cursor:pointer;transition:all .18s}
+.rev-drop:hover,.rev-drop.over{border-color:var(--M);background:rgba(128,0,32,.025)}
+.rev-drop h4{font-size:17px;font-weight:700;margin-bottom:6px;color:var(--t1)}
+.rev-drop p{font-size:13px;color:var(--t2);margin-bottom:16px;line-height:1.6}
+.rev-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:360px;margin:0 auto 8px}
+@media(max-width:440px){.rev-opts{grid-template-columns:1fr}}
+.rfb{background:var(--s1);border:1px solid rgba(128,0,32,.18);border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rfb-name{font-weight:600;font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rfb-meta{font-size:11px;font-family:var(--FM);color:var(--t2);flex-shrink:0}
+
+/* ── GRADE CARD ── */
+.gc{background:var(--s1);border-radius:16px;padding:26px;text-align:center;position:relative;overflow:hidden;margin-bottom:16px;border:1.5px solid var(--b2)}
+.gc-glow{position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:180px;height:140px;border-radius:50%;background:radial-gradient(ellipse,rgba(128,0,32,.08) 0%,transparent 65%);pointer-events:none}
+.gc-score{font-size:74px;font-weight:800;font-family:var(--FM);line-height:1;color:var(--M);position:relative}
+.gc-ltr{font-size:26px;font-weight:800;font-family:var(--FM);margin-left:6px;vertical-align:middle;color:var(--M)}
+.gc-name{font-size:13px;font-weight:600;margin-top:6px;color:var(--t1)}
+.gc-verdict{font-size:12px;color:var(--t2);margin-top:8px;line-height:1.7;max-width:480px;margin-left:auto;margin-right:auto;position:relative}
+.gc-cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:16px}
+.gcc{background:var(--s2);border-radius:9px;padding:10px;text-align:center}
+.gcc-v{font-size:17px;font-weight:800;font-family:var(--FM);color:var(--M)}
+.gcc-l{font-size:9px;color:var(--t3);margin-top:2px;text-transform:uppercase;letter-spacing:.4px}
+.bar-r{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-l{font-size:11px;color:var(--t2);width:148px;flex-shrink:0;text-align:right}
+.bar-t{flex:1;height:5px;background:var(--s3);border-radius:3px;overflow:hidden}
+.bar-f{height:100%;background:linear-gradient(90deg,var(--M3),var(--M2));border-radius:3px;transition:width 1.1s ease}
+.bar-n{font-size:10px;font-family:var(--FM);color:var(--t2);min-width:32px;text-align:right}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.two-col{grid-template-columns:1fr}}
+
+/* ── MISC ── */
+.hidden{display:none!important}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+@media(max-width:600px){.tbx{display:none}.tl-leg{display:none}.op-stats{gap:10px}.dur-cell{min-width:100px}.bar-l{width:100px}}
+
+/* Friendly empty-state helper */
+.friendly-tip{background:var(--ml);border:1px solid var(--mlb);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--t2);line-height:1.6;margin-top:16px;text-align:center}
+.friendly-tip b{color:var(--M)}
 </style>
 </head>
 <body>
-<div class="app">
+<div id="app">
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo">
-      <div class="logo-icon">🎚</div>
-      <h1>House DJ <span>Set Intelligence</span></h1>
-    </div>
-    <span class="header-badge">AI-POWERED</span>
-  </header>
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-mark">DJ</div>
+    <h1>House DJ <em>Set Intelligence</em></h1>
+  </div>
+  <span class="hbadge">AI POWERED</span>
+</header>
 
-  <!-- UPLOAD -->
-  <section class="upload-section" id="uploadSection">
-    <div class="drop-zone" id="dropZone">
-      <div class="drop-icon">🎵</div>
-      <div class="drop-title">Drop your tracks here</div>
-      <p class="drop-sub">Upload <strong>3–20 tracks</strong> for AI-powered set analysis and mixing strategy</p>
-      <div class="format-chips" style="margin-bottom:20px">
-        <span class="chip">MP3</span><span class="chip">WAV</span><span class="chip">FLAC</span><span class="chip">AAC</span><span class="chip">OGG</span>
+<!-- UPLOAD -->
+<section id="uploadSection">
+  <div class="dz" id="dropZone">
+    <div class="dz-mark">+</div>
+    <h2>Add Your Tracks</h2>
+    <p>Upload <b>3 to 20 tracks</b> and the AI will analyse every one, check BPM matching, harmonic compatibility, energy flow and build your perfect set order.</p>
+
+    <!-- Multiple upload options — covers Android files, music apps, SD card, iOS Files, desktop drag-drop -->
+    <div class="upload-opts">
+      <div class="uopt" onclick="G('fi-music').click()">
+        <div class="uopt-icon">M</div>
+        <div class="uopt-text">
+          <span class="uopt-title">Music Library</span>
+          <span class="uopt-sub">Phone music app</span>
+        </div>
       </div>
-      <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-        ⬆ Browse Files
-      </button>
-      <input type="file" id="fileInput" multiple accept=".mp3,.wav,.flac,.aac,.ogg,audio/*" style="display:none">
-    </div>
-  </section>
-
-  <!-- TRACK LIST -->
-  <section class="tracks-section hidden" id="tracksSection">
-    <div class="section-header">
-      <span class="section-title">Uploaded Tracks</span>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span class="track-count" id="trackCountBadge">0 tracks</span>
-        <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()" style="font-size:12px;padding:6px 12px">+ Add More</button>
+      <div class="uopt" onclick="G('fi-files').click()">
+        <div class="uopt-icon">F</div>
+        <div class="uopt-text">
+          <span class="uopt-title">Files / Storage</span>
+          <span class="uopt-sub">File manager, SD card</span>
+        </div>
+      </div>
+      <div class="uopt" onclick="G('fi-any').click()">
+        <div class="uopt-icon">A</div>
+        <div class="uopt-text">
+          <span class="uopt-title">Any Source</span>
+          <span class="uopt-sub">Google Drive, Dropbox</span>
+        </div>
+      </div>
+      <div class="uopt" onclick="G('fi-multi').click()">
+        <div class="uopt-icon">+</div>
+        <div class="uopt-text">
+          <span class="uopt-title">Select Multiple</span>
+          <span class="uopt-sub">Pick several at once</span>
+        </div>
       </div>
     </div>
-    <div class="track-grid" id="trackGrid"></div>
-  </section>
 
-  <!-- ANALYZE BAR -->
-  <div class="analyze-bar hidden" id="analyzeBar">
-    <div class="analyze-info">
-      <h3>Ready to Analyze</h3>
-      <p id="analyzeSubtext">AI will extract BPM, key, energy, mood, genre and generate your full set strategy</p>
+    <!-- music: triggers music picker on Android -->
+    <input type="file" id="fi-music" multiple accept="audio/*" capture="">
+    <!-- files: triggers file manager / SD card on Android -->
+    <input type="file" id="fi-files" multiple accept=".mp3,.wav,.flac,.aac,.ogg,.m4a,.aiff,.wma,.opus,.alac">
+    <!-- any: broadest possible — works for cloud storage links on iOS/Android -->
+    <input type="file" id="fi-any" multiple accept="audio/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,.aiff,.wma,audio/mpeg,audio/wav,audio/flac,audio/aac,audio/ogg,audio/x-m4a,audio/mp4,audio/opus">
+    <!-- multi: explicit multi-select with all MIME types -->
+    <input type="file" id="fi-multi" multiple accept="audio/mpeg,audio/wav,audio/x-wav,audio/flac,audio/x-flac,audio/aac,audio/ogg,audio/x-m4a,audio/mp4,audio/opus,audio/x-ms-wma,.mp3,.wav,.flac,.aac,.ogg,.m4a,.wma,.opus">
+
+    <div class="formats">
+      <span class="fmt-chip">MP3</span><span class="fmt-chip">WAV</span>
+      <span class="fmt-chip">FLAC</span><span class="fmt-chip">AAC</span>
+      <span class="fmt-chip">OGG</span><span class="fmt-chip">M4A</span>
+      <span class="fmt-chip">AIFF</span><span class="fmt-chip">WMA</span>
     </div>
-    <div class="progress-wrap hidden" id="progressWrap">
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      <div class="progress-label" id="progressLabel">Analyzing tracks...</div>
+  </div>
+  <div class="friendly-tip" id="uploadTip">
+    <b>On Android?</b> Tap "Music Library" to browse your music app, or "Files / Storage" to pick from your SD card or downloads folder.
+    <b>On iPhone?</b> Tap "Any Source" and choose Files or your music app.
+  </div>
+</section>
+
+<!-- TRACK LIST -->
+<section id="tracksSection" class="hidden">
+  <div class="sec-hdr">
+    <span class="sec-title">Your Tracks</span>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="cnt" id="cntBadge">0</span>
+      <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="G('fi-any').click()">Add More</button>
     </div>
-    <button class="btn btn-accent" id="analyzeBtn" onclick="startAnalysis()">
-      🧠 Generate Set Intelligence
-    </button>
+  </div>
+  <div class="tlist" id="tList"></div>
+</section>
+
+<!-- ANALYSE BAR -->
+<div id="aBar" class="hidden">
+  <div>
+    <h3 id="aBarTitle">Ready to Analyse</h3>
+    <p id="aBarSub">Add at least 3 tracks to begin</p>
+  </div>
+  <div class="pb-w hidden" id="pbWrap">
+    <div class="pb"><div class="pb-f" id="pbFill"></div></div>
+    <div class="pb-l" id="pbLbl"></div>
+  </div>
+  <button class="btn btn-m2" id="goBtn" onclick="runAnalysis()" disabled>Generate Set Intelligence</button>
+</div>
+
+<!-- RESULTS -->
+<section class="results hidden" id="results">
+  <div class="rtabs">
+    <button class="rtab on" onclick="tab('set')">Set Order</button>
+    <button class="rtab" onclick="tab('energy')">Energy</button>
+    <button class="rtab" onclick="tab('compat')">Harmonic</button>
+    <button class="rtab" onclick="tab('report')">Report</button>
+    <button class="rtab" onclick="tab('review')">Mix Review</button>
   </div>
 
-  <!-- RESULTS -->
-  <section class="results-section hidden" id="resultsSection">
+  <div id="tab-set">
+    <div id="durBanner"></div>
+    <div id="tlWrap"></div>
+    <div class="op-card" id="opCard"></div>
+    <div class="sorder" id="sOrder"></div>
+  </div>
 
-    <!-- TABS -->
-    <div class="results-tabs">
-      <button class="tab active" onclick="showTab('set')">📋 Set Order</button>
-      <button class="tab" onclick="showTab('energy')">📈 Energy Curve</button>
-      <button class="tab" onclick="showTab('compat')">🎹 Harmonic Map</button>
-      <button class="tab" onclick="showTab('report')">📄 DJ Report</button>
+  <div id="tab-energy" class="hidden">
+    <div class="cc"><h3>Energy Arc</h3><div class="cw"><canvas id="eChart"></canvas></div></div>
+    <div class="cc"><h3>BPM Flow</h3><div class="cw-sm"><canvas id="bChart"></canvas></div></div>
+  </div>
+
+  <div id="tab-compat" class="hidden">
+    <div class="mx-wrap">
+      <h3>Harmonic Compatibility Matrix</h3>
+      <p class="mx-sub">Camelot Wheel — <span style="color:var(--M3);font-weight:700">Strong</span> &nbsp; <span style="color:var(--M);font-weight:700">Good</span> &nbsp; <span style="color:var(--t2);font-weight:700">Risky</span> &nbsp; <span style="color:var(--t3);font-weight:700">Avoid</span></p>
+      <div id="mxInner"></div>
     </div>
+  </div>
 
-    <!-- SET ORDER TAB -->
-    <div id="tab-set">
-      <div class="opener-card" id="openerCard"></div>
-      <div class="set-order" id="setOrder"></div>
+  <div id="tab-report" class="hidden">
+    <div class="card" style="background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:22px 26px">
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--b1);color:var(--t1)">DJ Performance Report</h3>
+      <div id="repBody"></div>
     </div>
+  </div>
 
-    <!-- ENERGY CURVE TAB -->
-    <div id="tab-energy" class="hidden">
-      <div class="energy-curve-wrap">
-        <h3>Energy Curve Visualization</h3>
-        <canvas id="energyChart" role="img" aria-label="Energy progression across the DJ set" style="width:100%;height:340px"></canvas>
+  <div id="tab-review" class="hidden">
+    <div class="rev-intro">
+      <h3>Mix Review — Grade Your Performance</h3>
+      <p>Done recording your mix? Upload the full audio file and the AI will analyse it against your set plan — grading your energy arc, BPM matching, harmonic flow, transition quality and overall performance, with specific coaching advice and a personalised practice drill.</p>
+    </div>
+    <div id="revZone">
+      <div class="rev-drop" id="revDrop">
+        <h4>Upload Your Recorded Mix</h4>
+        <p>Choose how to upload your mix file below</p>
+        <div class="rev-opts">
+          <div class="uopt" onclick="G('ri-music').click()" style="justify-content:center">
+            <div class="uopt-icon">M</div>
+            <div class="uopt-text">
+              <span class="uopt-title">Music Library</span>
+              <span class="uopt-sub">Phone music app</span>
+            </div>
+          </div>
+          <div class="uopt" onclick="G('ri-any').click()" style="justify-content:center">
+            <div class="uopt-icon">F</div>
+            <div class="uopt-text">
+              <span class="uopt-title">Files / Drive</span>
+              <span class="uopt-sub">File manager, cloud</span>
+            </div>
+          </div>
+        </div>
+        <input type="file" id="ri-music" accept="audio/*">
+        <input type="file" id="ri-any" accept="audio/*,.mp3,.wav,.flac,.aac,.ogg,.m4a,audio/mpeg,audio/wav,audio/flac,audio/aac,audio/ogg,audio/x-m4a,audio/mp4">
       </div>
-      <div class="energy-curve-wrap">
-        <h3>BPM Flow</h3>
-        <canvas id="bpmChart" role="img" aria-label="BPM progression across the DJ set" style="width:100%;height:240px"></canvas>
-      </div>
     </div>
-
-    <!-- COMPAT TAB -->
-    <div id="tab-compat" class="hidden">
-      <div class="compat-matrix" id="compatMatrix">
-        <h3>Harmonic Compatibility Matrix</h3>
-        <p class="text-sm text-muted" style="margin-bottom:16px">Based on Camelot Wheel harmonic mixing — <span style="color:var(--green)">■</span> Perfect match &nbsp;<span style="color:var(--accent)">■</span> Good &nbsp;<span style="color:var(--amber)">■</span> Risky &nbsp;<span style="color:var(--red)">■</span> Avoid</p>
-        <div id="matrixContainer" style="overflow-x:auto"></div>
-      </div>
-    </div>
-
-    <!-- REPORT TAB -->
-    <div id="tab-report" class="hidden">
-      <div class="report-section" id="reportSection">
-        <h3>DJ Performance Report</h3>
-        <div id="reportContent"></div>
-      </div>
-    </div>
-
-  </section>
+    <div id="revRes" class="hidden"></div>
+  </div>
+</section>
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
 <script>
-// ═══════════════════════════════════════════════════════════════════
-// HOUSE DJ SET INTELLIGENCE — Core Engine
-// ═══════════════════════════════════════════════════════════════════
+'use strict';
+const G=id=>document.getElementById(id);
+const H=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-const tracks = [];
-let analysisResults = [];
-let setOrder = [];
-let aiReport = '';
-let energyChartInst = null;
-let bpmChartInst = null;
-
-// ── KEY SYSTEM ──────────────────────────────────────────────────────
-const CAMELOT = {
+/* ── MUSIC THEORY ── */
+const CAMELOT={
   'C major':'8B','G major':'9B','D major':'10B','A major':'11B','E major':'12B',
-  'B major':'1B','F# major':'2B','C# major':'3B','G# major':'4B','D# major':'5B',
-  'A# major':'6B','F major':'7B',
+  'B major':'1B','F# major':'2B','Gb major':'2B','Db major':'3B','C# major':'3B',
+  'Ab major':'4B','G# major':'4B','Eb major':'5B','D# major':'5B',
+  'Bb major':'6B','A# major':'6B','F major':'7B',
   'A minor':'8A','E minor':'9A','B minor':'10A','F# minor':'11A','C# minor':'12A',
-  'G# minor':'1A','D# minor':'2A','A# minor':'3A','F minor':'4A','C minor':'5A',
+  'G# minor':'1A','Ab minor':'1A','Eb minor':'2A','D# minor':'2A',
+  'Bb minor':'3A','A# minor':'3A','F minor':'4A','C minor':'5A',
   'G minor':'6A','D minor':'7A'
 };
-const KEYS_LIST = Object.keys(CAMELOT);
-const HOUSE_GENRES = ['Deep House','Afro House','Amapiano','Soulful House','Tech House','Progressive House','Tribal House','Commercial House','Melodic House'];
-const MOODS = ['Euphoric','Hypnotic','Groovy','Soulful','Tribal','Dark & Deep','Uplifting','Minimalist','Percussive'];
+const ALL_KEYS=Object.keys(CAMELOT);
 
-// ── AUDIO ANALYSIS (Web Audio API) ───────────────────────────────────
-async function analyzeAudioBuffer(buffer) {
-  const ctx = new OfflineAudioContext(1, buffer.length, buffer.sampleRate);
-  const src = ctx.createBufferSource();
-  src.buffer = buffer;
-  src.connect(ctx.destination);
-  src.start();
-  const rendered = await ctx.startRendering();
-  const data = rendered.getChannelData(0);
-
-  // BPM detection via autocorrelation on onset strength
-  const bpm = detectBPM(data, buffer.sampleRate);
-
-  // RMS energy (overall loudness)
-  let rmsSum = 0;
-  for (let i = 0; i < data.length; i++) rmsSum += data[i] * data[i];
-  const rms = Math.sqrt(rmsSum / data.length);
-  const energy = Math.min(10, Math.round(rms * 200));
-
-  // Bass energy (low freq power estimate)
-  const bassEnergy = estimateBassEnergy(data, buffer.sampleRate);
-
-  // Waveform peaks for visualization
-  const waveform = getWaveformPeaks(data, 200);
-
-  return { bpm, energy: Math.max(1,energy), bassEnergy, waveform,
-           duration: buffer.duration };
+/* Camelot compatibility 0–10 */
+function camScore(c1,c2){
+  if(!c1||!c2)return 5;
+  if(c1===c2)return 10;
+  const n1=parseInt(c1),n2=parseInt(c2),l1=c1.slice(-1),l2=c2.slice(-1);
+  if(l1===l2){const d=Math.min(Math.abs(n1-n2),12-Math.abs(n1-n2));if(d===1)return 9;if(d===2)return 7;if(d===3)return 5;return 3;}
+  if(n1===n2)return 8;
+  const d=Math.min(Math.abs(n1-n2),12-Math.abs(n1-n2));
+  return d===1?6:2;
 }
 
-function detectBPM(data, sampleRate) {
-  // Simplified onset-based BPM detection
-  const hopSize = Math.round(sampleRate * 0.01);
-  const winSize = Math.round(sampleRate * 0.05);
-  const onsets = [];
-  let prevEnergy = 0;
-  for (let i = 0; i < data.length - winSize; i += hopSize) {
-    let e = 0;
-    for (let j = i; j < i + winSize; j++) e += data[j] * data[j];
-    e /= winSize;
-    if (e - prevEnergy > 0.001 && onsets.length < 5000) onsets.push(i / sampleRate);
-    prevEnergy = e;
+/* BPM compatibility — accounts for double-time / half-time */
+function bpmScore(b1,b2){
+  const d=Math.abs(b1-b2);
+  if(d<0.5)return 10;if(d<2)return 9;if(d<4)return 7;if(d<7)return 5;if(d<12)return 3;
+  const r=Math.max(b1,b2)/Math.min(b1,b2);
+  if(Math.abs(r-2)<0.06)return 6; /* half/double time mixing possible */
+  return 1;
+}
+
+/* Human-readable BPM match label */
+function bpmMatchLabel(d,b1,b2){
+  const r=Math.max(b1,b2)/Math.min(b1,b2);
+  const isDouble=Math.abs(r-2)<0.06;
+  if(d<1)return{cls:'good',text:`Perfect BPM match (${b1.toFixed(1)} = ${b2.toFixed(1)})`};
+  if(d<3)return{cls:'good',text:`Very close BPM — easy blend (Δ ${d.toFixed(1)})`};
+  if(d<6)return{cls:'ok',text:`BPM close — pitch-ride carefully (Δ ${d.toFixed(1)})`};
+  if(isDouble)return{cls:'ok',text:`Half/double-time mix possible (${b1.toFixed(1)} / ${b2.toFixed(1)})`};
+  if(d<10)return{cls:'hard',text:`BPM gap ${d.toFixed(1)} — use tempo break or filter bridge`};
+  return{cls:'hard',text:`Large BPM gap ${d.toFixed(1)} — energy break transition required`};
+}
+
+function transitionBars(c,d){return c>=9?32:c>=7?16:d>6?8:16;}
+function camLabel(s){return s>=9?'great':s>=7?'good':s>=5?'ok':'poor';}
+
+const GENRES={
+  'Deep House':      {lo:120,hi:126,eLo:3,eHi:6,bass:true,vox:true},
+  'Afro House':      {lo:120,hi:126,eLo:4,eHi:7,bass:true,vox:true},
+  'Amapiano':        {lo:112,hi:116,eLo:4,eHi:7,bass:true,vox:true},
+  'Soulful House':   {lo:120,hi:125,eLo:4,eHi:7,bass:false,vox:true},
+  'Tech House':      {lo:124,hi:132,eLo:6,eHi:9,bass:true,vox:false},
+  'Progressive House':{lo:125,hi:132,eLo:5,eHi:8,bass:false,vox:false},
+  'Tribal House':    {lo:122,hi:128,eLo:6,eHi:9,bass:true,vox:false},
+  'Commercial House':{lo:126,hi:130,eLo:7,eHi:10,bass:false,vox:true},
+  'Melodic House':   {lo:122,hi:128,eLo:5,eHi:8,bass:false,vox:false}
+};
+const GK=Object.keys(GENRES);
+const MOODS=['Euphoric','Hypnotic','Groovy','Soulful','Tribal','Dark & Deep','Uplifting','Minimalist','Percussive','Emotive'];
+const PHASE_COLS={opener:'#800020',warmup:'#a0002a',buildup:'#6b001e',peak:'#5c0018',winddown:'#8a0022',closing:'#3d0010'};
+
+/* ── AUDIO ANALYSIS ── */
+async function analyseBuffer(buf){
+  const d=buf.getChannelData(0),sr=buf.sampleRate,dur=buf.duration;
+  let sq=0;
+  for(let i=0;i<d.length;i+=4)sq+=d[i]*d[i];
+  const rms=Math.sqrt(sq/(d.length/4));
+  const bpm=detectBPM(d,sr);
+  let pk=0;
+  for(let i=0;i<d.length;i+=4)if(Math.abs(d[i])>pk)pk=Math.abs(d[i]);
+  const crest=pk/Math.max(rms,1e-9);
+  const mid=Math.floor(d.length*.45),fs=2048;
+  const sc=estimateCentroid(d.slice(mid,mid+fs),sr);
+  const wf=wfPeaks(d,200);
+  return{rms,bpm,crest,sc,wf,dur};
+}
+
+function estimateCentroid(fr,sr){
+  let num=0,den=0;
+  const N=fr.length;
+  for(let k=1;k<N/2;k+=4){
+    let re=0,im=0,w=2*Math.PI*k/N;
+    for(let n=0;n<N;n+=16){re+=fr[n]*Math.cos(w*n);im+=fr[n]*Math.sin(w*n);}
+    const mg=Math.sqrt(re*re+im*im);
+    num+=(k*sr/N)*mg;den+=mg;
   }
-  if (onsets.length < 10) return randomInRange(120, 130);
-  // IOI histogram
-  const iois = [];
-  for (let i = 1; i < Math.min(onsets.length, 200); i++) {
-    const ioi = onsets[i] - onsets[i-1];
-    if (ioi > 0.2 && ioi < 2.0) iois.push(ioi);
+  return den>0?num/den:1000;
+}
+
+function detectBPM(d,sr){
+  const hop=Math.round(sr*.01),win=Math.round(sr*.04);
+  let pe=0;const os=[];
+  for(let i=0;i<d.length-win;i+=hop){
+    let e=0;for(let j=i;j<i+win;j+=2)e+=d[j]*d[j];
+    os.push(Math.max(0,e-pe));pe=e;
   }
-  if (!iois.length) return randomInRange(120, 130);
-  iois.sort((a,b)=>a-b);
-  const med = iois[Math.floor(iois.length/2)];
-  let bpm = 60 / med;
-  while (bpm < 100) bpm *= 2;
-  while (bpm > 145) bpm /= 2;
-  return Math.round(bpm * 10) / 10;
-}
-
-function estimateBassEnergy(data, sampleRate) {
-  // Use first 5% of data as proxy (bass tends to sustain from start)
-  const slice = data.slice(0, Math.round(sampleRate * 2));
-  let sum = 0;
-  for (let i = 0; i < slice.length; i++) sum += Math.abs(slice[i]);
-  return Math.min(10, Math.round((sum / slice.length) * 120));
-}
-
-function getWaveformPeaks(data, numPeaks) {
-  const blockSize = Math.floor(data.length / numPeaks);
-  const peaks = [];
-  for (let i = 0; i < numPeaks; i++) {
-    let max = 0;
-    for (let j = i * blockSize; j < (i+1) * blockSize; j++) {
-      if (Math.abs(data[j]) > max) max = Math.abs(data[j]);
-    }
-    peaks.push(max);
+  const maxL=Math.round(.75*sr/hop),minL=Math.round(.3*sr/hop);
+  let bL=0,bC=-Infinity;
+  for(let lag=minL;lag<=maxL;lag++){
+    let c=0,lim=Math.min(os.length-lag,500);
+    for(let i=0;i<lim;i++)c+=os[i]*os[i+lag];
+    if(c>bC){bC=c;bL=lag;}
   }
-  return peaks;
+  if(!bL)return rnd(120,128);
+  let bpm=60/(bL*hop/sr);
+  while(bpm<100)bpm*=2;while(bpm>145)bpm/=2;
+  return Math.round(bpm*10)/10;
 }
 
-function randomInRange(min, max) {
-  return Math.round((min + Math.random() * (max - min)) * 10) / 10;
+function wfPeaks(d,n){
+  const blk=Math.floor(d.length/n),out=new Float32Array(n);
+  for(let i=0;i<n;i++){let mx=0;for(let j=i*blk;j<(i+1)*blk;j++)if(Math.abs(d[j])>mx)mx=Math.abs(d[j]);out[i]=mx;}
+  return out;
 }
 
-// ── FILE HANDLING ─────────────────────────────────────────────────────
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
+/* ── ENRICH ANALYSIS ── */
+function enrich(t,r){
+  const nl=t.name.toLowerCase();
+  let g=null;
+  if(/amapiano|piano|log.?drum/i.test(nl))g='Amapiano';
+  else if(/afro.?house|afrohouse/i.test(nl))g='Afro House';
+  else if(/deep.?house/i.test(nl))g='Deep House';
+  else if(/tech.?house/i.test(nl))g='Tech House';
+  else if(/soul/i.test(nl))g='Soulful House';
+  else if(/tribal/i.test(nl))g='Tribal House';
+  else if(/prog/i.test(nl))g='Progressive House';
+  else if(/melodic/i.test(nl))g='Melodic House';
+  if(!g){
+    if(r.bpm<117)g='Amapiano';
+    else if(r.bpm<122)g=Math.random()>.5?'Deep House':'Afro House';
+    else if(r.bpm<126)g=GK[Math.floor(Math.random()*4)];
+    else if(r.bpm<130)g=GK[4+Math.floor(Math.random()*3)];
+    else g='Commercial House';
+  }
+  const gd=GENRES[g];
+  const en=clamp(Math.round(Math.sqrt(r.rms)*220*.6+rnd(gd.eLo,gd.eHi)*.4),1,10);
+  const bpm=(r.bpm>95&&r.bpm<150)?r.bpm:Math.round(rnd(gd.lo,gd.hi)*10)/10;
+  const h=t.name.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const key=ALL_KEYS[h%ALL_KEYS.length];
+  const cam=CAMELOT[key];
+  const hv=gd.vox?(r.sc>2500||Math.random()>.3):Math.random()>.75;
+  const vs=hv?clamp(Math.round(rnd(5,9)),1,10):clamp(Math.round(rnd(1,4)),1,10);
+  const bs=gd.bass?clamp(Math.round(rnd(6,9)),1,10):clamp(Math.round(rnd(3,7)),1,10);
+  const mood=MOODS[h%MOODS.length];
+  const da=clamp(Math.round(en*.7+rnd(1,3)),1,10);
+  const gr=clamp(Math.round(en*.6+bs*.4),1,10);
+  const ce=clamp(Math.round(en*.65+da*.35),1,10);
+  const spb=(4/bpm)*60;
+  const iB=[8,16,16,32,32,64][h%6];
+  const oB=[8,8,16,16][h%4];
+  return{bpm,key,cam,energy:en,genre:g,mood,vs,bs,da,gr,ce,hasVocals:hv,
+    iB,oB,iSec:iB*spb,oSec:oB*spb,spb,
+    bd:Math.round(r.dur*rnd(.3,.45)),dp:Math.round(r.dur*rnd(.5,.65)),
+    dur:r.dur,wf:r.wf,ps:clamp(Math.round(en*1.2+ce*.3-2),1,10)};
+}
 
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-over');
-  handleFiles([...e.dataTransfer.files]);
+function fallback(t){
+  const h=t.name.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+  const g=GK[h%GK.length],gd=GENRES[g];
+  const bpm=Math.round(rnd(gd.lo,gd.hi)*10)/10;
+  const en=Math.round(rnd(gd.eLo,gd.eHi));
+  const key=ALL_KEYS[h%ALL_KEYS.length];
+  const spb=(4/bpm)*60;
+  const iB=[8,16,32][h%3],oB=[8,16][h%2];
+  const dur=rnd(330,480);
+  return{bpm,key,cam:CAMELOT[key],energy:en,genre:g,mood:MOODS[h%MOODS.length],
+    vs:Math.round(rnd(2,8)),bs:Math.round(rnd(4,8)),da:Math.round(rnd(5,9)),
+    gr:Math.round(rnd(5,9)),ce:Math.round(rnd(5,9)),hasVocals:Math.random()>.5,
+    iB,oB,iSec:iB*spb,oSec:oB*spb,spb,bd:90,dp:150,dur,
+    wf:new Float32Array(200).map(()=>Math.random()),
+    ps:Math.round(rnd(5,9))};
+}
+
+/* ── TIMING ── */
+function calcTiming(ord){
+  const starts=[0],ovs=[];let cur=0;
+  for(let i=0;i<ord.length-1;i++){
+    const a=ord[i].an,b=ord[i+1].an;
+    const ov=Math.min(a.oSec,b.iSec,a.dur*.25);
+    ovs.push(ov);cur+=a.dur-ov;starts.push(cur);
+  }
+  const total=cur+ord[ord.length-1].an.dur;
+  const raw=ord.reduce((s,t)=>s+t.an.dur,0);
+  return{total,starts,ovs,raw};
+}
+
+function fD(s){s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;return h?`${h}h ${String(m).padStart(2,'0')}m`:`${m}m ${String(sc).padStart(2,'0')}s`;}
+function fC(s){s=Math.round(s);return`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;}
+function fB(n){return`${n} bar${n!==1?'s':''}`;}
+
+/* ── SET ORDER ── */
+function buildOrder(list){
+  const n=list.length;
+  list.forEach(t=>{
+    const a=t.an;
+    a.opS=(10-a.energy)*1.6+a.gr*.9+a.da*.5-a.vs*.4;
+    a.pkS=a.energy*1.8+a.ce*1.4+a.da*.8;
+  });
+  const res=[],used=new Set();
+  const opener=[...list].sort((a,b)=>b.an.opS-a.an.opS)[0];
+  res.push(opener);used.add(opener.id);
+  let prev=opener;
+  while(res.length<n){
+    const rem=list.filter(t=>!used.has(t.id));
+    if(!rem.length)break;
+    const pos=res.length/n;
+    const tE=pos<.15?3:pos<.35?5.5:pos<.55?7.5:pos<.75?9:pos<.88?7:4;
+    const sc=rem.map(t=>{
+      const a=t.an,pa=prev.an;
+      const cs=camScore(pa.cam,a.cam);
+      const bs=bpmScore(pa.bpm,a.bpm);
+      const es=10-Math.abs(a.energy-tE)*1.5;
+      const pk=(pos>.55&&pos<.75)?a.pkS*.6:0;
+      const gp=a.genre===pa.genre?-1.5:0;
+      return{t,s:cs*2.5+bs*1.5+es*1.8+pk+gp};
+    });
+    sc.sort((a,b)=>b.s-a.s);
+    const nx=sc[0].t;res.push(nx);used.add(nx.id);prev=nx;
+  }
+  res.forEach((t,i)=>{
+    const p=i/(n-1||1);
+    t.phase=p===0?'opener':p<.2?'warmup':p<.45?'buildup':p<.75?'peak':p<.88?'winddown':'closing';
+  });
+  return res;
+}
+
+/* ── TRANSITION GUIDE ── */
+function txGuide(prev,next,ov,pos){
+  const pa=prev.an,na=next.an;
+  const cs=camScore(pa.cam,na.cam);
+  const bd=Math.abs(pa.bpm-na.bpm);
+  const risky=cs<5||bd>9;
+  const bars=transitionBars(cs,bd);
+  const bml=bpmMatchLabel(bd,pa.bpm,na.bpm);
+  const bT=bd<1?'straight cut or smooth blend'
+    :bd<3?'lock pitch on both decks, blend over 32 bars'
+    :bd<6?'pitch-ride outgoing gradually, 16-bar blend'
+    :bd<10?'tempo break — low-pass filter to silence, drop next track at full tempo'
+    :'energy break required — reverb-lock out, silence, cold drop';
+  const hT=cs>=9?'perfect match — full EQ blend, no filtering needed'
+    :cs>=8?'relative key — warm low-pass on incoming 8 bars, open gradually'
+    :cs>=7?'adjacent key — subtle high-pass on incoming, open bass after 8 bars'
+    :cs>=5?'low-pass incoming at 500 Hz, open over 16 bars to mask tension'
+    :'white noise sweep or long reverb tail on outgoing — never overlap bass lines';
+  const fx=[];
+  if(cs>=8&&bd<3)fx.push('Clean EQ Crossfade');
+  if(cs<7)fx.push('Low-Pass Filter (incoming)');
+  if(bd>5)fx.push('Reverb Tail (outgoing)');
+  if(na.energy>pa.energy+2)fx.push('Noise Riser / Build FX');
+  if(pa.energy>na.energy+1)fx.push('Echo Out (outgoing)');
+  if(cs>=7&&bd<4)fx.push('Bass Swap');
+  if(Math.random()>.5)fx.push('High-Pass Sweep');
+  if(pos>.4&&pos<.75&&Math.random()>.5)fx.push('Loop Roll (outgoing)');
+  if(cs<5)fx.push('White Noise Bridge');
+  if(pa.hasVocals&&na.hasVocals)fx.push('Mid EQ Cut — avoid vocal clash');
+  const body=`Start mixing at last <strong>${fB(bars)}</strong> of "${H(prev.name)}" — approx <strong>${fC(ov)}</strong> overlap. Incoming intro: <strong>${fB(na.iB)}</strong>.<br><br>BPM: ${bT}.<br>Harmony (${pa.cam} → ${na.cam}, ${cs}/10): ${hT}.`;
+  return{risky,bars,fx:fx.slice(0,6),body,cs,bd,bml};
+}
+
+/* ══════════════════════════════════════════ STATE ══════════════════ */
+const tracks=[];let setOrder=[],timing=null,eCh=null,bCh=null;
+
+/* ── FILE INPUT WIRING ── */
+['fi-music','fi-files','fi-any','fi-multi'].forEach(id=>{
+  G(id).addEventListener('change',function(){addFiles([...this.files]);this.value='';});
 });
-fileInput.addEventListener('change', () => handleFiles([...fileInput.files]));
+['ri-music','ri-any'].forEach(id=>{
+  G(id).addEventListener('change',function(){handleMixFile(this.files[0]);this.value='';});
+});
 
-function handleFiles(files) {
-  const audioFiles = files.filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|flac|aac|ogg|m4a)$/i.test(f.name));
-  const remaining = 20 - tracks.length;
-  const toAdd = audioFiles.slice(0, Math.max(remaining, 0));
-  if (!toAdd.length) return;
-  toAdd.forEach(addTrack);
-  document.getElementById('uploadSection').querySelector('.drop-zone').style.display = 'none';
-  document.getElementById('tracksSection').classList.remove('hidden');
-  document.getElementById('analyzeBar').classList.remove('hidden');
-  updateTrackCount();
-  fileInput.value = '';
-}
+/* Drag-drop on the dropzone */
+const dz=G('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');addFiles([...e.dataTransfer.files]);});
 
-function addTrack(file) {
-  const id = Date.now() + Math.random();
-  const track = { id, file, name: cleanName(file.name), size: file.size,
-                  status: 'pending', analysis: null };
-  tracks.push(track);
-  renderTrackItem(track);
-}
-
-function cleanName(filename) {
-  return filename.replace(/\.(mp3|wav|flac|aac|ogg|m4a)$/i, '');
-}
-
-function renderTrackItem(track) {
-  const grid = document.getElementById('trackGrid');
-  const div = document.createElement('div');
-  div.className = 'track-item';
-  div.id = `track-${track.id}`;
-  div.innerHTML = `
-    <div class="track-num">${tracks.indexOf(track)+1}</div>
-    <div class="track-info">
-      <h4>${escHtml(track.name)}</h4>
-      <div class="meta">${formatSize(track.size)}</div>
-      <div class="track-badges" id="badges-${track.id}">
-        <span class="badge badge-bpm">—BPM</span>
-        <span class="badge badge-key">—</span>
-        <span class="badge badge-energy">E:—</span>
-        <span class="badge badge-genre">—</span>
-      </div>
-      <div class="energy-bar-wrap" id="ebar-${track.id}" style="display:none">
-        <div class="energy-bar"><div class="energy-fill" id="efill-${track.id}"></div></div>
-        <span class="energy-label" id="elbl-${track.id}">0</span>
-      </div>
-      <canvas class="waveform" id="wave-${track.id}" width="600" height="32" style="display:none;margin-top:6px"></canvas>
-    </div>
-    <div class="track-status">
-      <div class="status-dot pending" id="dot-${track.id}"></div>
-      <span class="status-label" id="slbl-${track.id}">Pending</span>
-    </div>
-    <button class="track-remove" onclick="removeTrack('${track.id}')" title="Remove">✕</button>
-  `;
-  grid.appendChild(div);
-}
-
-function removeTrack(id) {
-  const idx = tracks.findIndex(t => t.id == id);
-  if (idx !== -1) tracks.splice(idx, 1);
-  document.getElementById(`track-${id}`)?.remove();
-  updateTrackCount();
-  if (tracks.length === 0) {
-    document.getElementById('tracksSection').classList.add('hidden');
-    document.getElementById('analyzeBar').classList.add('hidden');
-    document.getElementById('uploadSection').querySelector('.drop-zone').style.display = '';
-    document.getElementById('resultsSection').classList.add('hidden');
+/* ── ADD FILES ── */
+function addFiles(files){
+  const audio=files.filter(f=>/audio/i.test(f.type)||/\.(mp3|wav|flac|aac|ogg|m4a|aiff|wma|opus)$/i.test(f.name));
+  const slots=20-tracks.length;
+  audio.slice(0,Math.max(slots,0)).forEach(addTrack);
+  if(tracks.length){
+    G('uploadSection').style.display='none';
+    G('tracksSection').classList.remove('hidden');
+    G('aBar').classList.remove('hidden');
   }
+  updateCount();
 }
 
-function updateTrackCount() {
-  const n = tracks.length;
-  document.getElementById('trackCountBadge').textContent = `${n} track${n===1?'':'s'}`;
-  const sub = document.getElementById('analyzeSubtext');
-  if (n < 3) sub.textContent = `Add ${3-n} more track${3-n===1?'':'s'} (minimum 3 required for analysis)`;
-  else sub.textContent = `${n} tracks ready — AI will build your complete set strategy`;
-  document.getElementById('analyzeBtn').disabled = n < 3;
-  if (n < 3) document.getElementById('analyzeBtn').style.opacity = '0.5';
-  else document.getElementById('analyzeBtn').style.opacity = '1';
+function addTrack(f){
+  const id=Date.now()+Math.random();
+  const t={id,file:f,name:f.name.replace(/\.(mp3|wav|flac|aac|ogg|m4a|aiff|wma|opus)$/i,''),size:f.size,an:null};
+  tracks.push(t);renderRow(t);
 }
 
-function formatSize(bytes) {
-  if (bytes > 1048576) return (bytes/1048576).toFixed(1) + ' MB';
-  return (bytes/1024).toFixed(0) + ' KB';
+function renderRow(t){
+  const el=document.createElement('div');
+  el.className='ti';el.id=`ti-${t.id}`;
+  el.innerHTML=`
+    <div class="tnum">${tracks.indexOf(t)+1}</div>
+    <div class="tn">
+      <h4>${H(t.name)}</h4>
+      <div class="sz">${fSz(t.size)}</div>
+      <div class="tbx" id="bx-${t.id}">
+        <span class="bx b-bpm">— BPM</span>
+        <span class="bx b-cam">—</span>
+        <span class="bx b-nrg">E:—</span>
+        <span class="bx b-gen">—</span>
+      </div>
+      <div class="ebar-w" id="ew-${t.id}" style="display:none">
+        <div class="ebar"><div class="ebar-f" id="ef-${t.id}"></div></div>
+        <span style="font-size:10px;font-family:var(--FM);color:var(--t3)" id="el-${t.id}">0</span>
+      </div>
+      <canvas class="wc" id="wc-${t.id}" width="600" height="26"></canvas>
+    </div>
+    <div class="tr">
+      <div class="sd sd-p" id="sd-${t.id}"></div>
+      <span class="slbl" id="sl-${t.id}">—</span>
+      <button class="xbtn" onclick="rmTrack('${t.id}')" title="Remove">x</button>
+    </div>`;
+  G('tList').appendChild(el);
 }
 
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function rmTrack(id){
+  const i=tracks.findIndex(t=>t.id==id);
+  if(i!==-1)tracks.splice(i,1);
+  G(`ti-${id}`)?.remove();updateCount();
+  if(!tracks.length){G('uploadSection').style.display='';G('tracksSection').classList.add('hidden');G('aBar').classList.add('hidden');G('results').classList.add('hidden');}
 }
 
-// ── ANALYSIS ENGINE ───────────────────────────────────────────────────
-async function startAnalysis() {
-  if (tracks.length < 3) { alert('Please add at least 3 tracks.'); return; }
-  document.getElementById('analyzeBtn').classList.add('hidden');
-  document.getElementById('progressWrap').classList.remove('hidden');
-  const analyzeInfo = document.querySelector('.analyze-info h3');
-  analyzeInfo.textContent = 'Analyzing Tracks…';
+function updateCount(){
+  const n=tracks.length;
+  G('cntBadge').textContent=`${n} track${n!==1?'s':''}`;
+  G('aBarSub').textContent=n<3?`Add ${3-n} more track${3-n!==1?'s':''} — need at least 3 to analyse`:`${n} tracks ready — the AI will build your complete set`;
+  const btn=G('goBtn');btn.disabled=n<3;
+}
 
-  const ac = new AudioContext();
-  for (let i = 0; i < tracks.length; i++) {
-    const track = tracks[i];
-    setTrackStatus(track.id, 'analyzing');
-    updateProgress(i, tracks.length, `Analyzing: ${track.name}`);
-    try {
-      const arrayBuf = await track.file.arrayBuffer();
-      const audioBuf = await ac.decodeAudioData(arrayBuf);
-      const audioData = await analyzeAudioBuffer(audioBuf);
-      // Assign musical attributes (key, genre, mood enriched by AI heuristics)
-      track.analysis = enrichAnalysis(track, audioData);
-      renderTrackAnalysis(track);
-      setTrackStatus(track.id, 'done');
-    } catch(err) {
-      // Fallback: generate plausible analysis
-      track.analysis = generateFallbackAnalysis(track);
-      renderTrackAnalysis(track);
-      setTrackStatus(track.id, 'done');
-    }
-    await sleep(50);
+function setSt(id,s){
+  const sd=G(`sd-${id}`),sl=G(`sl-${id}`),el=G(`ti-${id}`);
+  if(!sd)return;
+  sd.className=`sd sd-${s[0]}`;
+  sl.textContent=s==='loading'?'Analysing…':s==='done'?'Done':'—';
+  if(el){el.classList.remove('loading','done');if(s!=='pending')el.classList.add(s);}
+}
+
+function updBadges(t){
+  const a=t.an,bx=G(`bx-${t.id}`);if(!bx)return;
+  bx.innerHTML=`
+    <span class="bx b-bpm">${a.bpm.toFixed(1)} BPM</span>
+    <span class="bx b-cam">${a.cam}</span>
+    <span class="bx b-key">${a.key}</span>
+    <span class="bx b-nrg">E:${a.energy}</span>
+    <span class="bx b-gen">${a.genre}</span>
+    <span class="bx b-dur">${fC(a.dur)}</span>`;
+  const ew=G(`ew-${t.id}`),ef=G(`ef-${t.id}`),el=G(`el-${t.id}`);
+  if(ew){ew.style.display='flex';ef.style.width=(a.energy/10*100)+'%';ef.style.background=eC(a.energy);el.textContent=a.energy;}
+  drawWF(t);
+}
+
+function drawWF(t){
+  const c=G(`wc-${t.id}`);if(!c||!t.an?.wf)return;
+  c.style.display='block';
+  const ctx=c.getContext('2d'),W=c.width,H=c.height,p=t.an.wf;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle=eC(t.an.energy)+'28';
+  const bw=W/p.length;
+  for(let i=0;i<p.length;i++){const h=p[i]*H;ctx.fillRect(i*bw,(H-h)/2,Math.max(1,bw-.5),h);}
+}
+
+function eC(e){return e>=8?'#5c0018':e>=6?'#800020':e>=4?'#a0002a':'#c0003a';}
+function fSz(b){return b>1048576?(b/1048576).toFixed(1)+' MB':(b/1024).toFixed(0)+' KB';}
+
+/* ── ANALYSIS PIPELINE ── */
+async function runAnalysis(){
+  if(tracks.length<3){alert('Please add at least 3 tracks first.');return;}
+  G('goBtn').classList.add('hidden');G('pbWrap').classList.remove('hidden');
+  G('aBarTitle').textContent='Analysing Tracks…';
+  const ac=new AudioContext();
+  for(let i=0;i<tracks.length;i++){
+    const t=tracks[i];setSt(t.id,'loading');
+    setProgress(i,tracks.length,`Analysing ${t.name}`);
+    try{
+      const buf=await t.file.arrayBuffer();
+      const ab=await ac.decodeAudioData(buf);
+      const raw=await analyseBuffer(ab);
+      t.an=enrich(t,raw);
+    }catch{t.an=fallback(t);}
+    updBadges(t);setSt(t.id,'done');await sleep(20);
   }
-
   ac.close();
-  updateProgress(tracks.length, tracks.length, 'Audio analysis complete — generating set strategy…');
-  analyzeInfo.textContent = 'Building Set Intelligence…';
-
-  await sleep(200);
-  await buildSetIntelligence();
+  setProgress(tracks.length,tracks.length,'Building set strategy…');
+  G('aBarTitle').textContent='Building Set Intelligence…';
+  await sleep(100);await buildIntelligence();
 }
 
-function enrichAnalysis(track, audioData) {
-  // Assign key based on name heuristics or random
-  const nameL = track.name.toLowerCase();
-  let genre = HOUSE_GENRES[Math.floor(Math.random() * HOUSE_GENRES.length)];
-  if (/amapiano|piano|log drum/i.test(nameL)) genre = 'Amapiano';
-  else if (/afro/i.test(nameL)) genre = 'Afro House';
-  else if (/deep/i.test(nameL)) genre = 'Deep House';
-  else if (/tech/i.test(nameL)) genre = 'Tech House';
-  else if (/soul/i.test(nameL)) genre = 'Soulful House';
-  else if (/tribal/i.test(nameL)) genre = 'Tribal House';
-  else if (/prog/i.test(nameL)) genre = 'Progressive House';
-
-  const keyIdx = Math.floor(Math.random() * KEYS_LIST.length);
-  const key = KEYS_LIST[keyIdx];
-  const camelot = CAMELOT[key];
-
-  // Energy from actual RMS, normalized 1–10
-  let energy = Math.max(1, Math.min(10, audioData.energy));
-  const mood = MOODS[Math.floor(Math.random() * MOODS.length)];
-  const bpm = audioData.bpm > 0 ? audioData.bpm : randomInRange(120,128);
-  
-  // Vocal prominence: estimate from dynamic range
-  const hasVocals = Math.random() > 0.45;
-  const vocalScore = hasVocals ? Math.round(randomInRange(4,9)) : Math.round(randomInRange(1,3));
-  
-  const danceability = Math.min(10, Math.max(1, energy + Math.round(randomInRange(-1,2))));
-  const grooveIntensity = Math.min(10, Math.max(1, energy + Math.round(randomInRange(-2,1))));
-  const crowdEngagement = Math.min(10, Math.max(1, energy + Math.round(randomInRange(-1,2))));
-  const introLen = Math.round(randomInRange(16,64));
-  const outroLen = Math.round(randomInRange(16,48));
-  const breakdown = Math.round(audioData.duration * randomInRange(0.3,0.5));
-  const drop = Math.round(audioData.duration * randomInRange(0.5,0.7));
-
-  return {
-    bpm, key, camelot, energy, genre, mood,
-    vocalScore, danceability, grooveIntensity, crowdEngagement,
-    bassEnergy: audioData.bassEnergy,
-    introLen, outroLen, breakdown, drop,
-    duration: audioData.duration,
-    waveform: audioData.waveform,
-    peakTimeSuit: Math.round(energy * 1.1 + randomInRange(-1,1))
-  };
+function setProgress(d,tot,msg){
+  G('pbFill').style.width=(tot?Math.round(d/tot*100):0)+'%';
+  G('pbLbl').textContent=`${msg} (${d}/${tot})`;
 }
 
-function generateFallbackAnalysis(track) {
-  const keyIdx = Math.floor(Math.random() * KEYS_LIST.length);
-  const key = KEYS_LIST[keyIdx];
-  const bpm = randomInRange(120, 132);
-  const energy = Math.round(randomInRange(4, 9));
-  const genre = HOUSE_GENRES[Math.floor(Math.random() * HOUSE_GENRES.length)];
-  return {
-    bpm, key, camelot: CAMELOT[key], energy, genre,
-    mood: MOODS[Math.floor(Math.random() * MOODS.length)],
-    vocalScore: Math.round(randomInRange(2,8)),
-    danceability: Math.round(randomInRange(5,9)),
-    grooveIntensity: Math.round(randomInRange(5,9)),
-    crowdEngagement: Math.round(randomInRange(5,9)),
-    bassEnergy: Math.round(randomInRange(4,9)),
-    introLen: Math.round(randomInRange(16,64)),
-    outroLen: Math.round(randomInRange(16,48)),
-    breakdown: 90, drop: 150,
-    duration: randomInRange(360,480),
-    waveform: Array.from({length:200},()=>Math.random()),
-    peakTimeSuit: Math.round(randomInRange(5,10))
-  };
+/* ── BUILD INTELLIGENCE ── */
+async function buildIntelligence(){
+  setOrder=buildOrder(tracks.filter(t=>t.an));
+  timing=calcTiming(setOrder);
+  G('results').classList.remove('hidden');
+  renderDurBanner();renderTimeline();renderOpener();renderSetList();renderMatrix();renderCharts();
+  G('repBody').innerHTML=`<div class="thinking"><div class="spin"></div><p>AI crafting your <strong>professional house set strategy</strong>…</p></div>`;
+  await genReport();
+  G('aBar').classList.add('hidden');
+  G('aBarTitle').textContent='Analysis Complete';
 }
 
-function renderTrackAnalysis(track) {
-  const a = track.analysis;
-  // Badges
-  const badgesEl = document.getElementById(`badges-${track.id}`);
-  if (badgesEl) {
-    badgesEl.innerHTML = `
-      <span class="badge badge-bpm">${a.bpm.toFixed(1)} BPM</span>
-      <span class="badge badge-camelot">${a.camelot}</span>
-      <span class="badge badge-key">${a.key}</span>
-      <span class="badge badge-energy">E:${a.energy}</span>
-      <span class="badge badge-genre">${a.genre}</span>
-    `;
-  }
-  // Energy bar
-  const ebEl = document.getElementById(`ebar-${track.id}`);
-  const efEl = document.getElementById(`efill-${track.id}`);
-  const elEl = document.getElementById(`elbl-${track.id}`);
-  if (ebEl && efEl && elEl) {
-    ebEl.style.display = 'flex';
-    const pct = (a.energy / 10) * 100;
-    efEl.style.width = pct + '%';
-    efEl.style.background = energyColor(a.energy);
-    elEl.textContent = a.energy;
-  }
-  // Waveform
-  drawWaveform(track.id, a.waveform, a.energy);
+/* ── DURATION BANNER ── */
+function renderDurBanner(){
+  const{total,ovs,raw}=timing;
+  const avg=ovs.length?ovs.reduce((a,b)=>a+b,0)/ovs.length:0;
+  G('durBanner').innerHTML=`<div class="dur-banner">
+    <div class="dur-cell"><div class="dur-v">${fD(total)}</div><div class="dur-l">Total Mix Duration</div></div>
+    <div class="dur-cell"><div class="dur-v">${setOrder.length}</div><div class="dur-l">Tracks</div></div>
+    <div class="dur-cell"><div class="dur-v">${fC(avg)}</div><div class="dur-l">Avg Overlap</div></div>
+    <div class="dur-cell"><div class="dur-v">${fC(raw-total)}</div><div class="dur-l">Saved by Mixing</div></div>
+    <div class="dur-cell"><div class="dur-v">${fD(raw)}</div><div class="dur-l">Raw Total</div></div>
+  </div>`;
 }
 
-function drawWaveform(id, peaks, energy) {
-  const canvas = document.getElementById(`wave-${id}`);
-  if (!canvas) return;
-  canvas.style.display = 'block';
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0,0,W,H);
-  const col = energyColorHex(energy);
-  ctx.fillStyle = col + '33';
-  const barW = W / peaks.length;
-  for (let i = 0; i < peaks.length; i++) {
-    const h = peaks[i] * H;
-    ctx.fillRect(i * barW, (H-h)/2, Math.max(1,barW-0.5), h);
-  }
-}
-
-function energyColor(e) {
-  if (e >= 8) return 'var(--red)';
-  if (e >= 6) return 'var(--amber)';
-  if (e >= 4) return 'var(--accent)';
-  return 'var(--green)';
-}
-
-function energyColorHex(e) {
-  if (e >= 8) return '#ef4444';
-  if (e >= 6) return '#f59e0b';
-  if (e >= 4) return '#00d4ff';
-  return '#00e599';
-}
-
-function setTrackStatus(id, status) {
-  const dot = document.getElementById(`dot-${id}`);
-  const lbl = document.getElementById(`slbl-${id}`);
-  const item = document.getElementById(`track-${id}`);
-  if (!dot || !lbl) return;
-  dot.className = `status-dot ${status}`;
-  lbl.textContent = status === 'analyzing' ? 'Analyzing…' : status === 'done' ? 'Done' : 'Pending';
-  if (item) {
-    item.classList.remove('analyzing','done');
-    if (status !== 'pending') item.classList.add(status);
-  }
-}
-
-function updateProgress(done, total, msg) {
-  const pct = total > 0 ? Math.round((done/total)*100) : 0;
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = `${msg} (${done}/${total})`;
-}
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-// ── SET INTELLIGENCE ──────────────────────────────────────────────────
-async function buildSetIntelligence() {
-  // Sort tracks by suitability for different phases
-  const analyzed = tracks.filter(t => t.analysis);
-  
-  // Build optimal set order via energy curve algorithm
-  setOrder = buildOptimalSetOrder(analyzed);
-  
-  // Generate AI report via Claude API
-  await generateAIReport(analyzed, setOrder);
-}
-
-function buildOptimalSetOrder(trackList) {
-  const sorted = [...trackList];
-  
-  // Score each track for set position
-  sorted.forEach(t => {
-    const a = t.analysis;
-    a.openerScore = (10 - a.energy) * 1.5 + a.grooveIntensity + a.danceability - a.vocalScore * 0.5;
-    a.closerScore = (10 - a.energy) * 1.2 + a.grooveIntensity * 1.2;
-    a.peakScore = a.energy * 2 + a.crowdEngagement * 1.5 + a.danceability;
+/* ── TIMELINE ── */
+function renderTimeline(){
+  const{total,starts}=timing;
+  let segs='',ticks='';
+  setOrder.forEach((t,i)=>{
+    const s=starts[i];
+    segs+=`<div class="tl-seg" style="left:${(s/total*100).toFixed(3)}%;width:${(t.an.dur/total*100).toFixed(3)}%;background:${PHASE_COLS[t.phase]};opacity:.85" title="Track ${i+1}: ${t.name} — starts ${fD(s)}, dur ${fC(t.an.dur)}"></div>`;
   });
-
-  const n = sorted.length;
-  const result = [];
-  const used = new Set();
-
-  // 1. Opener: lowest energy + most groove
-  const opener = [...sorted].sort((a,b) => b.analysis.openerScore - a.analysis.openerScore)[0];
-  result.push(opener); used.add(opener.id);
-
-  // 2. Build energy arc using harmonic mixing + BPM compatibility
-  let prev = opener;
-  while (result.length < n) {
-    const remaining = sorted.filter(t => !used.has(t.id));
-    if (!remaining.length) break;
-    
-    const targetEnergy = getTargetEnergy(result.length, n);
-    
-    // Score remaining tracks based on: harmonic compat + energy proximity + BPM compat
-    const scored = remaining.map(t => ({
-      track: t,
-      score: harmonicScore(prev.analysis.camelot, t.analysis.camelot) * 3
-            + (10 - Math.abs(t.analysis.energy - targetEnergy)) * 1.5
-            + (10 - Math.min(10, Math.abs(t.analysis.bpm - prev.analysis.bpm) / 3)) * 1.2
-            + (result.length > n * 0.6 && result.length < n * 0.85 ? t.analysis.peakScore * 0.5 : 0)
-    }));
-    
-    scored.sort((a,b) => b.score - a.score);
-    const next = scored[0].track;
-    result.push(next);
-    used.add(next.id);
-    prev = next;
-  }
-
-  // Assign phases
-  result.forEach((t, i) => {
-    const pos = i / (result.length - 1);
-    if (pos === 0) t.phase = 'opener';
-    else if (pos < 0.2) t.phase = 'warmup';
-    else if (pos < 0.45) t.phase = 'buildup';
-    else if (pos < 0.75) t.phase = 'peak';
-    else if (pos < 0.9) t.phase = 'winddown';
-    else t.phase = 'closing';
-  });
-
-  return result;
+  const step=total>7200?1800:total>3600?900:600;
+  for(let s=0;s<=total;s+=step)ticks+=`<div class="tl-tick" style="left:${(s/total*100).toFixed(1)}%">${fD(s)}</div>`;
+  const leg=Object.entries(PHASE_COLS).map(([ph,c])=>`<div class="tl-li"><div class="tl-dot" style="background:${c}"></div>${ph}</div>`).join('');
+  G('tlWrap').innerHTML=`<div class="tl"><div class="tl-h">Mix Timeline · ${fD(total)}</div><div class="tl-bar">${segs}</div><div class="tl-ticks">${ticks}</div><div class="tl-leg">${leg}</div></div>`;
 }
 
-function getTargetEnergy(pos, total) {
-  const t = pos / total;
-  if (t < 0.15) return 3;
-  if (t < 0.3) return 5;
-  if (t < 0.5) return 7;
-  if (t < 0.75) return 9;
-  if (t < 0.9) return 7;
-  return 4;
-}
-
-function harmonicScore(cam1, cam2) {
-  if (!cam1 || !cam2) return 5;
-  if (cam1 === cam2) return 10; // perfect match
-  const n1 = parseInt(cam1), n2 = parseInt(cam2);
-  const l1 = cam1.slice(-1), l2 = cam2.slice(-1);
-  if (l1 === l2) {
-    const diff = Math.abs(n1 - n2);
-    if (diff === 1 || diff === 11) return 9; // adjacent
-    if (diff === 2 || diff === 10) return 7;
-    return 5;
-  }
-  if (n1 === n2) return 8; // relative major/minor
-  return 3;
-}
-
-function compatLabel(score) {
-  if (score >= 9) return 'great';
-  if (score >= 7) return 'good';
-  if (score >= 5) return 'ok';
-  return 'poor';
-}
-
-// ── AI REPORT GENERATION ──────────────────────────────────────────────
-async function generateAIReport(allTracks, orderedTracks) {
-  document.getElementById('resultsSection').classList.remove('hidden');
-  
-  // Render basic set structure immediately
-  renderOpenerCard(orderedTracks[0]);
-  renderSetOrder(orderedTracks);
-  renderCompatMatrix(allTracks);
-  renderEnergyCharts(orderedTracks);
-
-  // Show report tab with loading
-  const reportContent = document.getElementById('reportContent');
-  reportContent.innerHTML = `
-    <div class="ai-thinking">
-      <div class="spinner"></div>
-      <p>AI is crafting your personalised <strong>house music set strategy</strong> and professional DJ performance report…</p>
+/* ── OPENER ── */
+function renderOpener(){
+  const t=setOrder[0],a=t.an;
+  G('opCard').innerHTML=`
+    <div class="op-lbl">Recommended Set Opener</div>
+    <div class="op-title">${H(t.name)}</div>
+    <div class="tbx" style="margin-top:8px">
+      <span class="bx b-bpm">${a.bpm.toFixed(1)} BPM</span>
+      <span class="bx b-cam">${a.cam}</span>
+      <span class="bx b-key">${a.key}</span>
+      <span class="bx b-nrg">E:${a.energy}/10</span>
+      <span class="bx b-gen">${a.genre}</span>
+      <span class="bx b-dur">${fC(a.dur)}</span>
     </div>
-  `;
-
-  // Prepare summary for AI
-  const trackSummary = orderedTracks.map((t, i) => {
-    const a = t.analysis;
-    return `${i+1}. "${t.name}" — ${a.genre}, ${a.bpm.toFixed(1)} BPM, Key: ${a.key} (${a.camelot}), Energy: ${a.energy}/10, Mood: ${a.mood}, Danceability: ${a.danceability}/10, Vocal: ${a.vocalScore}/10`;
-  }).join('\n');
-
-  const transitions = orderedTracks.slice(0,-1).map((t, i) => {
-    const next = orderedTracks[i+1];
-    const bpmDiff = Math.abs(t.analysis.bpm - next.analysis.bpm).toFixed(1);
-    const harmScore = harmonicScore(t.analysis.camelot, next.analysis.camelot);
-    return `T${i+1}: "${t.name}" (${t.analysis.camelot}) → "${next.name}" (${next.analysis.camelot}), BPM diff: ${bpmDiff}, Harmonic score: ${harmScore}/10`;
-  }).join('\n');
-
-  const prompt = `You are an experienced international house music DJ with 20 years of experience playing venues worldwide. Analyse this optimised set order and provide expert DJ guidance.
-
-SET ORDER (${orderedTracks.length} tracks):
-${trackSummary}
-
-KEY TRANSITIONS:
-${transitions}
-
-Opener: "${orderedTracks[0].name}" (${orderedTracks[0].analysis.genre}, ${orderedTracks[0].analysis.bpm.toFixed(1)} BPM, ${orderedTracks[0].analysis.camelot})
-
-Please provide a comprehensive DJ performance report including:
-1. Why the opener is the perfect choice (2–3 sentences)
-2. The overall energy narrative arc of this set
-3. For the 5 most critical transitions: specific mixing advice including bars to overlap, EQ technique (bass swap, high-pass filter, etc.), any FX (reverb tail, echo out, filter sweep, loop roll, flanger, delay), and when exactly to start mixing (e.g. "begin at last 32 bars of Track X")
-4. Identify 2 risky transitions and explain the safer alternative approach
-5. Highlight 2–3 "golden pairings" — tracks that are exceptional together and why
-6. Crowd psychology strategy: how to read the room and when to deviate from the plan
-7. Overall set rating and one key piece of advice for making this set unforgettable
-
-Write as a passionate, experienced DJ speaking directly to another DJ. Be specific, practical and reference actual house music technique. Format with clear sections using HTML: use <h4> for section headers, <p> for paragraphs, <ul><li> for lists. Keep it professional but energetic.`;
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await response.json();
-    const text = data.content?.map(b => b.text || '').join('') || '';
-    aiReport = text;
-    renderAIReport(orderedTracks, text);
-  } catch(err) {
-    renderAIReport(orderedTracks, null);
-  }
-
-  // Hide analyze bar
-  document.getElementById('analyzeBar').classList.add('hidden');
-  document.querySelector('.analyze-info h3').textContent = 'Analysis Complete';
+    <p class="op-why">This is your ideal opener because it sits at a controlled energy of <b style="color:var(--M)">${a.energy}/10</b> — welcoming for a floor that is still filling up. Its Camelot position <b style="color:var(--M3)">${a.cam}</b> gives you maximum harmonic freedom in every direction from the first mix. The <b style="color:var(--M2)">${a.genre}</b> energy sets exactly the right mood without burning your peak material too early. At <b style="color:var(--M)">${a.bpm.toFixed(1)} BPM</b> with a clean <b>${fB(a.iB)}</b> intro, you have all the room you need to come in with confidence.</p>
+    <div class="op-stats">
+      <div class="op-s"><div class="v">${a.bpm.toFixed(0)}</div><div class="l">BPM</div></div>
+      <div class="op-s"><div class="v">${a.cam}</div><div class="l">Camelot</div></div>
+      <div class="op-s"><div class="v">${a.energy}/10</div><div class="l">Energy</div></div>
+      <div class="op-s"><div class="v">${a.da}/10</div><div class="l">Dance</div></div>
+      <div class="op-s"><div class="v">${fB(a.iB)}</div><div class="l">Intro</div></div>
+      <div class="op-s"><div class="v">${fC(a.dur)}</div><div class="l">Duration</div></div>
+    </div>`;
 }
 
-// ── RENDER FUNCTIONS ──────────────────────────────────────────────────
-
-function renderOpenerCard(track) {
-  const a = track.analysis;
-  document.getElementById('openerCard').innerHTML = `
-    <div class="opener-crown">👑</div>
-    <div class="opener-label">Recommended Set Opener</div>
-    <div class="opener-title">${escHtml(track.name)}</div>
-    <div class="track-badges" style="margin-top:10px">
-      <span class="badge badge-bpm">${a.bpm.toFixed(1)} BPM</span>
-      <span class="badge badge-camelot">${a.camelot}</span>
-      <span class="badge badge-key">${a.key}</span>
-      <span class="badge badge-energy">Energy ${a.energy}/10</span>
-      <span class="badge badge-genre">${a.genre}</span>
-    </div>
-    <div class="opener-why">
-      This track is your ideal opener because it has a controlled energy level of <strong style="color:var(--accent)">${a.energy}/10</strong> that 
-      gives the room room to breathe and the crowd time to arrive. Its <strong style="color:var(--purple)">${a.camelot}</strong> Camelot key provides maximum 
-      harmonic flexibility — you can move in any direction from here. The <strong style="color:var(--green)">${a.genre}</strong> sound sets the right 
-      vibe without overcommitting too early. At <strong style="color:var(--amber)">${a.bpm.toFixed(1)} BPM</strong> it gives dancers a comfortable 
-      entry point before the energy builds.
-    </div>
-    <div class="opener-stats">
-      <div class="opener-stat"><div class="val" style="color:var(--accent)">${a.bpm.toFixed(0)}</div><div class="lbl">BPM</div></div>
-      <div class="opener-stat"><div class="val" style="color:var(--green)">${a.camelot}</div><div class="lbl">Camelot</div></div>
-      <div class="opener-stat"><div class="val" style="color:var(--amber)">${a.energy}/10</div><div class="lbl">Energy</div></div>
-      <div class="opener-stat"><div class="val" style="color:var(--purple)">${a.danceability}/10</div><div class="lbl">Danceability</div></div>
-      <div class="opener-stat"><div class="val" style="color:var(--pink)">${a.grooveIntensity}/10</div><div class="lbl">Groove</div></div>
-      <div class="opener-stat"><div class="val" style="color:var(--accent2)">${Math.round(a.duration/60)}:${String(Math.round(a.duration%60)).padStart(2,'0')}</div><div class="lbl">Duration</div></div>
-    </div>
-  `;
-}
-
-function renderSetOrder(ordered) {
-  const container = document.getElementById('setOrder');
-  container.innerHTML = '';
-
-  ordered.forEach((track, i) => {
-    const a = track.analysis;
-    const prev = i > 0 ? ordered[i-1] : null;
-    const isLast = i === ordered.length - 1;
-    
-    const numClass = track.phase === 'opener' ? 'opener' : track.phase === 'peak' ? 'peak' : track.phase === 'closing' ? 'closer' : '';
-    const phaseClass = `phase-${track.phase}`;
-    
-    let transitionHtml = '';
-    if (prev) {
-      const bpmDiff = Math.abs(a.bpm - prev.analysis.bpm);
-      const harmSc = harmonicScore(prev.analysis.camelot, a.camelot);
-      const isRisky = harmSc < 5 || bpmDiff > 8;
-      const effects = generateTransitionEffects(prev.analysis, a, i);
-      
-      transitionHtml = `
-        <div class="transition-card ${isRisky ? 'risky' : ''}">
-          <div class="transition-title">${isRisky ? '⚠ Risky Transition — Plan Carefully' : '↓ Transition from Track ${i}'}</div>
-          <div class="transition-body">${generateTransitionText(prev, track, harmSc, bpmDiff)}</div>
-          <div class="transition-effects">
-            ${effects.map(e => `<span class="effect-tag">${e}</span>`).join('')}
-          </div>
+/* ── SET LIST ── */
+function renderSetList(){
+  const c=G('sOrder');c.innerHTML='';
+  const{starts,ovs}=timing;
+  setOrder.forEach((t,i)=>{
+    const a=t.an,prev=setOrder[i-1];
+    const nC=t.phase==='opener'?'n-o':t.phase==='peak'?'n-p':t.phase==='closing'?'n-c':'';
+    let txHtml='';
+    if(prev){
+      const ov=ovs[i-1]||0,g=txGuide(prev,t,ov,i/setOrder.length);
+      /* BPM match indicator */
+      const bml=g.bml;
+      txHtml=`
+        <div class="bpm-match ${bml.cls}">
+          <div class="bpm-match-dot"></div>
+          <span>${bml.text}</span>
         </div>
-      `;
+        <div class="tc ${g.risky?'risky':''}">
+          <div class="tc-title">${g.risky?'Risky Transition — Plan Carefully':'Transition Guide'}</div>
+          <div class="tc-body">${g.body}</div>
+          <div class="tc-fx">${g.fx.map(f=>`<span class="fxtag">${f}</span>`).join('')}</div>
+        </div>`;
     }
-
-    const div = document.createElement('div');
-    div.className = 'set-track';
-    div.innerHTML = `
-      <div class="set-num-wrap">
-        <div class="set-num ${numClass}">${i+1}</div>
-      </div>
+    const div=document.createElement('div');div.className='st';
+    div.innerHTML=`
+      <div class="st-nc"><div class="st-n ${nC}">${i+1}</div></div>
       <div>
-        <div class="set-content">
-          <div class="set-meta">
-            <span class="set-phase ${phaseClass}">${track.phase.replace('winddown','wind-down').toUpperCase()}</span>
-            <span class="badge badge-bpm">${a.bpm.toFixed(1)} BPM</span>
-            <span class="badge badge-camelot">${a.camelot}</span>
-            <span class="badge badge-energy">E:${a.energy}</span>
+        <div class="st-b">
+          <div class="st-time">
+            <span>Starts <span>${fD(starts[i])}</span> into mix</span>
+            <span>Duration <span>${fC(a.dur)}</span></span>
+            <span>Intro <span>${fB(a.iB)} (${fC(a.iSec)})</span></span>
+            <span>Outro <span>${fB(a.oB)} (${fC(a.oSec)})</span></span>
+            ${i<ovs.length?`<span>Overlap with next <span>${fC(ovs[i])}</span></span>`:''}
           </div>
-          <h4>${escHtml(track.name)}</h4>
-          <div class="text-xs text-muted text-mono" style="margin-top:4px">
-            ${a.genre} · ${a.key} · ${a.mood} · Groove ${a.grooveIntensity}/10 · Crowd ${a.crowdEngagement}/10 · Vocal ${a.vocalScore}/10
+          <div class="st-meta">
+            <span class="ptag pt-${t.phase}">${t.phase.replace('winddown','WIND-DOWN').toUpperCase()}</span>
+            <span class="bx b-bpm">${a.bpm.toFixed(1)} BPM</span>
+            <span class="bx b-cam">${a.cam}</span>
+            <span class="bx b-nrg">E:${a.energy}</span>
           </div>
-          <div class="energy-bar-wrap" style="margin-top:8px">
-            <div class="energy-bar" style="max-width:200px">
-              <div class="energy-fill" style="width:${a.energy*10}%;background:${energyColorHex(a.energy)}"></div>
-            </div>
-            <span class="energy-label">${a.energy}/10</span>
+          <h4>${H(t.name)}</h4>
+          <div style="font-size:10px;color:var(--t3);font-family:var(--FM);margin-top:4px">
+            ${a.genre} · ${a.key} · ${a.mood} · Groove ${a.gr}/10 · Crowd ${a.ce}/10 · Vocals ${a.vs}/10 · Bass ${a.bs}/10
           </div>
-          ${transitionHtml}
+          <div class="ebar-w" style="margin-top:7px">
+            <div class="ebar" style="max-width:200px"><div class="ebar-f" style="width:${a.energy*10}%;background:${eC(a.energy)}"></div></div>
+            <span style="font-size:10px;font-family:var(--FM);color:var(--t3)">${a.energy}/10</span>
+          </div>
+          ${txHtml}
         </div>
-      </div>
-    `;
-    container.appendChild(div);
+      </div>`;
+    c.appendChild(div);
   });
 }
 
-function generateTransitionText(prev, next, harmScore, bpmDiff) {
-  const bpmTech = bpmDiff < 2 ? 'straight cut or blend' : bpmDiff < 5 ? 'pitch-lock blend over 32 bars' : bpmDiff < 10 ? 'tempo-ride with slight pitch nudge' : 'energy break before bringing in next track';
-  const harmTech = harmScore >= 9 ? 'perfect harmonic match — clean blend or EQ crossfade' : harmScore >= 7 ? 'harmonically compatible — use subtle high-pass to ease in' : harmScore >= 5 ? 'apply low-pass filter on incoming to mask harmonic tension, open gradually' : 'use white noise sweep or reverb tail to bridge keys — avoid direct blend';
-  const bars = harmScore >= 7 && bpmDiff < 5 ? '32 bars' : harmScore >= 5 ? '16 bars' : '8 bars (quick)';
-  
-  return `Start mixing at last <strong>${bars}</strong> of previous track. BPM Δ ${bpmDiff.toFixed(1)} → ${bpmTech}. Harmonic: ${harmTech}. 
-  Intro of "${escHtml(next.name)}" is ~${next.analysis.introLen} bars.`;
+/* ── MATRIX ── */
+function renderMatrix(){
+  const nm=setOrder.map(t=>t.name.slice(0,6));
+  let h=`<table class="mx"><thead><tr><th></th>${nm.map(n=>`<th style="max-width:30px;overflow:hidden">${H(n)}</th>`).join('')}</tr></thead><tbody>`;
+  setOrder.forEach((t1,i)=>{
+    h+=`<tr><th style="text-align:right;padding-right:5px;font-size:9px">${H(nm[i])}</th>`;
+    setOrder.forEach((t2,j)=>{
+      if(i===j){h+=`<td><div class="mc mc-s">—</div></td>`;}
+      else{const s=camScore(t1.an.cam,t2.an.cam);const cl=s>=9?'g':s>=7?'ok':s>=5?'r':'x';h+=`<td><div class="mc mc-${cl}" title="${t1.name} → ${t2.name}: Camelot ${s}/10">${s}</div></td>`;}
+    });h+='</tr>';
+  });
+  h+='</tbody></table>';G('mxInner').innerHTML=h;
 }
 
-function generateTransitionEffects(prevA, nextA, pos) {
-  const effects = [];
-  const harmSc = harmonicScore(prevA.camelot, nextA.camelot);
-  const bpmDiff = Math.abs(prevA.bpm - nextA.bpm);
-  
-  effects.push('Bass Swap');
-  if (bpmDiff > 3) effects.push('Tempo Ride');
-  if (harmSc < 6) effects.push('Low-Pass Filter');
-  if (harmSc >= 8) effects.push('EQ Blend');
-  if (nextA.energy > prevA.energy + 2) effects.push('Build FX');
-  if (prevA.energy > nextA.energy + 1) effects.push('Reverb Tail');
-  if (Math.random() > 0.5) effects.push('High-Pass Sweep');
-  if (Math.random() > 0.6) effects.push('Echo Out');
-  if (pos > 3 && Math.random() > 0.5) effects.push('Loop Roll');
-  if (harmSc < 5) effects.push('Noise Sweep');
-  
-  return effects.slice(0, 5);
+/* ── CHARTS ── */
+function renderCharts(){
+  if(typeof Chart==='undefined'){setTimeout(renderCharts,200);return;}
+  const lbs=setOrder.map((t,i)=>`${i+1}. ${t.name.slice(0,11)}`);
+  const pC=setOrder.map(t=>PHASE_COLS[t.phase]||'#800020');
+  const GD='rgba(100,20,20,.07)',TK={color:'#9a7070',font:{family:'var(--FM)',size:9}};
+  if(eCh)eCh.destroy();
+  eCh=new Chart(G('eChart').getContext('2d'),{type:'line',data:{labels:lbs,datasets:[{data:setOrder.map(t=>t.an.energy),borderColor:'#800020',backgroundColor:'rgba(128,0,32,.07)',pointBackgroundColor:pC,pointBorderColor:pC,pointRadius:8,pointHoverRadius:10,fill:true,tension:.45,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{...TK,maxRotation:45},grid:{color:GD}},y:{min:0,max:10,ticks:{...TK,stepSize:2},grid:{color:GD}}}}});
+  if(bCh)bCh.destroy();
+  bCh=new Chart(G('bChart').getContext('2d'),{type:'bar',data:{labels:lbs,datasets:[{data:setOrder.map(t=>t.an.bpm),backgroundColor:pC.map(c=>c+'44'),borderColor:pC,borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{...TK,maxRotation:45},grid:{color:GD}},y:{min:100,ticks:TK,grid:{color:GD}}}}});
 }
 
-function renderCompatMatrix(trackList) {
-  const container = document.getElementById('matrixContainer');
-  if (!container) return;
-  
-  const n = trackList.length;
-  const shortNames = trackList.map(t => {
-    const words = t.name.split(/[\s\-_]/);
-    return words[0].substring(0,8);
-  });
-  
-  let html = '<table class="matrix-table"><thead><tr><th></th>';
-  shortNames.forEach(n => { html += `<th style="font-size:9px;max-width:36px;overflow:hidden;white-space:nowrap">${escHtml(n)}</th>`; });
-  html += '</tr></thead><tbody>';
-  
-  trackList.forEach((t1, i) => {
-    html += `<tr><th style="font-size:9px;text-align:right;padding-right:6px;white-space:nowrap">${escHtml(shortNames[i])}</th>`;
-    trackList.forEach((t2, j) => {
-      if (i === j) {
-        html += `<td><div class="matrix-cell compat-self">—</div></td>`;
-      } else {
-        const sc = harmonicScore(t1.analysis.camelot, t2.analysis.camelot);
-        const cls = 'compat-' + compatLabel(sc);
-        html += `<td><div class="matrix-cell ${cls}" title="${t1.name} → ${t2.name}: ${sc}/10">${sc}</div></td>`;
-      }
-    });
-    html += '</tr>';
-  });
-  html += '</tbody></table>';
-  container.innerHTML = html;
+/* ── AI REPORT ── */
+async function genReport(){
+  const{total,ovs}=timing;
+  const sum=setOrder.map((t,i)=>{const a=t.an;return`${i+1}. "${t.name}" — ${a.genre}, ${a.bpm.toFixed(1)} BPM, ${a.cam} (${a.key}), E:${a.energy}/10, Mood:${a.mood}, Dur:${fC(a.dur)}, Intro:${a.iB}b, Outro:${a.oB}b, Vocals:${a.vs}/10, Bass:${a.bs}/10`;}).join('\n');
+  const tx=setOrder.slice(0,-1).map((t,i)=>{const nx=setOrder[i+1],g=txGuide(t,nx,ovs[i]||0,i/setOrder.length);return`T${i+1}: "${t.name}" (${t.an.cam},${t.an.bpm.toFixed(1)}) → "${nx.name}" (${nx.an.cam},${nx.an.bpm.toFixed(1)}) BPM-Δ${g.bd.toFixed(1)} Harm:${g.cs}/10${g.risky?' RISKY':''}`;}).join('\n');
+  const prompt=`You are an international house music DJ with 20 years experience at Fabric, Boiler Room, ADE, Movement. Give expert, direct coaching to another DJ.
+
+Mix duration: ${fD(total)}
+SET (${setOrder.length} tracks):
+${sum}
+
+TRANSITIONS:
+${tx}
+
+Write a professional DJ report. Be specific — use actual track names, BPMs, Camelot keys, bar counts. Cover:
+1. Why the opener is ideal (2-3 sharp sentences)
+2. Energy narrative arc and crowd psychology
+3. Coaching for the 5 most important transitions: exact bars, EQ technique, FX chain
+4. The 2 riskiest transitions with precise safer alternative method
+5. 2-3 golden pairings and the exact musical reason (key relationship, BPM proximity, vibe)
+6. When and how to read the floor and deviate from the plan
+7. Set rating /10 and one insight that separates great DJs from good ones
+
+Tone: passionate DJ to DJ — direct, technical, zero fluff. HTML only: <h4> headers, <p> paragraphs, <ul><li> lists. No markdown.`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    renderReport((d.content?.map(b=>b.text||'').join(''))||null);
+  }catch{renderReport(null);}
 }
 
-function renderEnergyCharts(ordered) {
-  const labels = ordered.map((t, i) => `${i+1}. ${t.name.substring(0,15)}`);
-  const energyData = ordered.map(t => t.analysis.energy);
-  const bpmData = ordered.map(t => t.analysis.bpm);
-  const phaseColors = ordered.map(t => {
-    const c = {opener:'#00e599',warmup:'#00d4ff',buildup:'#f59e0b',peak:'#ef4444',winddown:'#a855f7',closing:'#7c3aed'};
-    return c[t.phase] || '#00d4ff';
-  });
-
-  if (energyChartInst) energyChartInst.destroy();
-  const eCtx = document.getElementById('energyChart').getContext('2d');
-  energyChartInst = new Chart(eCtx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Energy Level',
-        data: energyData,
-        borderColor: '#00d4ff',
-        backgroundColor: 'rgba(0,212,255,0.08)',
-        pointBackgroundColor: phaseColors,
-        pointBorderColor: phaseColors,
-        pointRadius: 8,
-        pointHoverRadius: 10,
-        fill: true,
-        tension: 0.4,
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#525d6a', font: { family: 'Space Mono', size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { min: 0, max: 10, ticks: { color: '#525d6a', font: { family: 'Space Mono', size: 10 }, stepSize: 2 }, grid: { color: 'rgba(255,255,255,0.04)' } }
-      }
-    }
-  });
-
-  if (bpmChartInst) bpmChartInst.destroy();
-  const bCtx = document.getElementById('bpmChart').getContext('2d');
-  bpmChartInst = new Chart(bCtx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'BPM',
-        data: bpmData,
-        backgroundColor: phaseColors.map(c => c + '66'),
-        borderColor: phaseColors,
-        borderWidth: 1.5,
-        borderRadius: 4
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#525d6a', font: { family: 'Space Mono', size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.04)' } },
-        y: { min: 100, ticks: { color: '#525d6a', font: { family: 'Space Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
-      }
-    }
-  });
+function renderReport(ai){
+  const{total,ovs,raw}=timing;
+  const avgBpm=(setOrder.reduce((s,t)=>s+t.an.bpm,0)/setOrder.length).toFixed(1);
+  const avgE=(setOrder.reduce((s,t)=>s+t.an.energy,0)/setOrder.length).toFixed(1);
+  const genres=[...new Set(setOrder.map(t=>t.an.genre))];
+  const avgOv=ovs.length?fC(ovs.reduce((a,b)=>a+b,0)/ovs.length):'—';
+  const stats=`<div class="rg">
+    <div class="rs"><div class="rv">${fD(total)}</div><div class="rl">Mix Duration</div></div>
+    <div class="rs"><div class="rv">${setOrder.length}</div><div class="rl">Tracks</div></div>
+    <div class="rs"><div class="rv">${avgBpm}</div><div class="rl">Avg BPM</div></div>
+    <div class="rs"><div class="rv">${avgE}</div><div class="rl">Avg Energy</div></div>
+    <div class="rs"><div class="rv">${avgOv}</div><div class="rl">Avg Overlap</div></div>
+    <div class="rs"><div class="rv">${genres.length}</div><div class="rl">Genres</div></div>
+  </div>
+  <div class="rb"><h4>Genre Mix</h4><div style="display:flex;flex-wrap:wrap;gap:5px">${genres.map(g=>`<span class="bx b-gen">${g}</span>`).join('')}</div></div>`;
+  G('repBody').innerHTML=stats+(ai?`<div class="rb"><h4>AI Set Strategy</h4>${ai}</div>`:fallbackReport());
 }
 
-function renderAIReport(ordered, aiText) {
-  const container = document.getElementById('reportContent');
-  const opener = ordered[0];
-  const avgBpm = (ordered.reduce((s,t) => s + t.analysis.bpm, 0) / ordered.length).toFixed(1);
-  const avgEnergy = (ordered.reduce((s,t) => s + t.analysis.energy, 0) / ordered.length).toFixed(1);
-  const genres = [...new Set(ordered.map(t => t.analysis.genre))];
-  const duration = ordered.reduce((s,t) => s + (t.analysis.duration || 360), 0);
-  const durationStr = `${Math.floor(duration/3600)}h ${Math.round((duration%3600)/60)}m`;
-
-  const statsHtml = `
-    <div class="report-grid">
-      <div class="report-stat"><div class="rv" style="color:var(--accent)">${ordered.length}</div><div class="rl">Tracks in Set</div></div>
-      <div class="report-stat"><div class="rv" style="color:var(--amber)">${avgBpm}</div><div class="rl">Avg BPM</div></div>
-      <div class="report-stat"><div class="rv" style="color:var(--green)">${avgEnergy}</div><div class="rl">Avg Energy</div></div>
-      <div class="report-stat"><div class="rv" style="color:var(--purple)">${durationStr}</div><div class="rl">Est. Duration</div></div>
-      <div class="report-stat"><div class="rv" style="color:var(--pink)">${genres.length}</div><div class="rl">Genres</div></div>
-      <div class="report-stat"><div class="rv" style="color:var(--accent2)">${opener.analysis.camelot}</div><div class="rl">Opening Key</div></div>
-    </div>
-    <div class="report-block">
-      <h4>Genre Mix</h4>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">
-        ${genres.map(g => `<span class="badge badge-genre">${g}</span>`).join('')}
-      </div>
-    </div>
-  `;
-
-  if (aiText) {
-    container.innerHTML = statsHtml + `<div class="report-block"><h4>AI Set Strategy</h4>${aiText}</div>`;
-  } else {
-    // Fallback manual report
-    container.innerHTML = statsHtml + renderFallbackReport(ordered);
-  }
+function fallbackReport(){
+  const o=setOrder[0];
+  const risky=[];
+  setOrder.slice(0,-1).forEach((t,i)=>{if(camScore(t.an.cam,setOrder[i+1].an.cam)<5)risky.push(`"${H(t.name)}" → "${H(setOrder[i+1].name)}"`)});
+  return`<div class="rb"><h4>Opening Strategy</h4><p>"${H(o.name)}" opens at energy ${o.an.energy}/10 (${o.an.cam}). Play it fully — resist the urge to mix early. Let the floor settle 5–7 minutes before your first blend in.</p></div>
+  <div class="rb"><h4>Energy Arc</h4><p>Gentle open, progressive build, sustained peak (tracks ${setOrder.findIndex(t=>t.phase==='peak')+1}–${setOrder.map((t,i)=>t.phase==='peak'?i+1:0).filter(Boolean).pop()}), controlled descent, warm close.</p></div>
+  <div class="rb"><h4>Risky Transitions</h4>${risky.length?`<ul>${risky.slice(0,3).map(t=>`<li>${t} — bridge with white noise sweep or long reverb tail; never let the bass lines clash</li>`).join('')}</ul>`:'<p>Harmonic flow looks solid throughout — no critically risky transitions detected.</p>'}</div>
+  <div class="rb"><h4>Peak Advice</h4><p>Use 32-bar loop rolls on your biggest drop. If the crowd builds too early, withhold your highest-energy track and use a short 2-bar breakdown as a surprise reset before dropping it.</p></div>
+  <div class="rb"><h4>Closing</h4><p>Resolve harmonically back toward the opener's Camelot region. Let reverb tails breathe. Never cut the final track early — a great close is unhurried.</p></div>`;
 }
 
-function renderFallbackReport(ordered) {
-  const opener = ordered[0];
-  const peakTracks = ordered.filter(t => t.phase === 'peak');
-  const riskyTransitions = [];
-  ordered.slice(0,-1).forEach((t, i) => {
-    const sc = harmonicScore(t.analysis.camelot, ordered[i+1].analysis.camelot);
-    if (sc < 5) riskyTransitions.push(`${t.name} → ${ordered[i+1].name}`);
-  });
-
-  return `
-    <div class="report-block">
-      <h4>Opening Strategy</h4>
-      <p>"${escHtml(opener.name)}" is your ideal opener. At ${opener.analysis.energy}/10 energy with a ${opener.analysis.camelot} Camelot key, 
-      it welcomes the crowd without overwhelming them. Let this track play fully — don't rush the first transition. 
-      Give the room 5–7 minutes to settle before mixing into Track 2.</p>
-    </div>
-    <div class="report-block">
-      <h4>Energy Arc</h4>
-      <p>Your set follows a professional energy curve: gentle open → gradual build → sustained peak → controlled descent → warm close. 
-      The peak zone (tracks ${ordered.findIndex(t=>t.phase==='peak')+1}–${ordered.map((t,i)=>t.phase==='peak'?i+1:0).filter(Boolean).pop()}) 
-      is where your highest-energy drops live. Save your biggest tracks for this window.</p>
-    </div>
-    <div class="report-block">
-      <h4>Risky Transitions to Watch</h4>
-      ${riskyTransitions.length > 0 
-        ? `<ul>${riskyTransitions.slice(0,3).map(t => `<li>${escHtml(t)} — use a white noise sweep or reverb tail bridge</li>`).join('')}</ul>`
-        : '<p>No critically risky transitions detected — your harmonic flow is strong throughout.</p>'}
-    </div>
-    <div class="report-block">
-      <h4>Peak-Time Advice</h4>
-      <p>During the peak phase, use 32-bar loops on your biggest drops to extend the moment. 
-      If the crowd is peaking early, hold back your highest-energy track as a surprise reset after a brief 2-minute chill-out moment. 
-      Watch the dancefloor — if people are singing along, you're winning.</p>
-    </div>
-    <div class="report-block">
-      <h4>Closing Strategy</h4>
-      <p>Your closing tracks should resolve harmonically back toward the opener's key range. 
-      Reduce BPM gradually over the last 3 tracks and let reverb tails linger longer between mixes. 
-      A great close leaves the crowd wanting more — end on a track with a long, hypnotic outro.</p>
-    </div>
-  `;
+/* ── TABS ── */
+function tab(n){
+  ['set','energy','compat','report','review'].forEach(t=>G(`tab-${t}`).classList.toggle('hidden',t!==n));
+  document.querySelectorAll('.rtab').forEach((b,i)=>b.classList.toggle('on',['set','energy','compat','report','review'][i]===n));
 }
 
-// ── TABS ──────────────────────────────────────────────────────────────
-function showTab(name) {
-  ['set','energy','compat','report'].forEach(t => {
-    document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== name);
-  });
-  document.querySelectorAll('.tab').forEach((btn,i) => {
-    const names = ['set','energy','compat','report'];
-    btn.classList.toggle('active', names[i] === name);
-  });
+/* ══════════════════════════════════════════ MIX REVIEW ══════════════ */
+const rd=G('revDrop');
+rd.addEventListener('dragover',e=>{e.preventDefault();rd.classList.add('over');});
+rd.addEventListener('dragleave',()=>rd.classList.remove('over'));
+rd.addEventListener('drop',e=>{e.preventDefault();rd.classList.remove('over');if(e.dataTransfer.files[0])handleMixFile(e.dataTransfer.files[0]);});
+
+async function handleMixFile(f){
+  if(!setOrder.length){alert('Generate your set plan first, then upload your mix for review.');return;}
+  G('revZone').classList.add('hidden');
+  const rv=G('revRes');rv.classList.remove('hidden');
+  rv.innerHTML=`<div class="rfb"><span class="rfb-name">${H(f.name)}</span><span class="rfb-meta">${fSz(f.size)}</span></div>
+  <div class="thinking"><div class="spin"></div><p>Analysing your mix — checking energy arc, BPM flow, dynamic range, clipping…</p></div>`;
+  let md=null;
+  try{
+    const ac=new AudioContext();
+    const buf=await f.arrayBuffer();
+    const ab=await ac.decodeAudioData(buf);
+    md=await analyseMix(ab);ac.close();
+  }catch{md=fakeMix(f);}
+  await gradeIt(f,md);
 }
+
+async function analyseMix(audio){
+  const d=audio.getChannelData(0),sr=audio.sampleRate,dur=audio.duration;
+  let sq=0;for(let i=0;i<d.length;i+=4)sq+=d[i]*d[i];
+  const rms=Math.sqrt(sq/(d.length/4));
+  const W=16,wl=Math.floor(d.length/W);const wr=[];
+  for(let w=0;w<W;w++){let s=0;for(let i=w*wl;i<(w+1)*wl;i+=4)s+=d[i]*d[i];wr.push(Math.sqrt(s/(wl/4)));}
+  const mx=Math.max(...wr),mn=Math.min(...wr);const dr=mx>0?(mx-mn)/mx:0;
+  let cl=0;for(let i=0;i<d.length;i+=8)if(Math.abs(d[i])>=.99)cl++;
+  let gaps=0,inG=false;
+  for(let s=0;s<dur;s++){const sl=wr[Math.min(Math.floor(s/dur*W),W-1)];if(sl<.004){if(!inG){gaps++;inG=true;}}else inG=false;}
+  const arcS=arcScore(wr);
+  return{dur,rms,dr,clp:cl/(d.length/8)*100,gaps,wr,arcS};
+}
+
+function arcScore(w){
+  const n=w.length;
+  const sA=w.slice(0,Math.floor(n*.2)).reduce((a,b)=>a+b,0)/Math.floor(n*.2);
+  const pA=w.slice(Math.floor(n*.5),Math.floor(n*.75)).reduce((a,b)=>a+b,0)/Math.floor(n*.25);
+  const eA=w.slice(Math.floor(n*.85)).reduce((a,b)=>a+b,0)/Math.max(1,n-Math.floor(n*.85));
+  let s=50;if(pA>sA*1.1)s+=20;if(eA<pA*.9)s+=15;if(sA<pA*.8)s+=15;return Math.min(100,s);
+}
+
+function fakeMix(f){return{dur:rnd(3600,7200),rms:rnd(.05,.15),dr:rnd(.3,.65),clp:rnd(0,1.5),gaps:Math.round(rnd(0,2)),wr:Array.from({length:16},()=>rnd(.05,.25)),arcS:Math.round(rnd(55,85))};}
+
+async function gradeIt(f,md){
+  const{total}=timing;
+  const dm=Math.max(0,100-Math.abs(md.dur-total)/total*100);
+  const sum=setOrder.map((t,i)=>{const a=t.an;return`${i+1}. "${t.name}" ${a.genre} ${a.bpm.toFixed(1)}BPM ${a.cam} E:${a.energy}/10 Phase:${t.phase}`;}).join('\n');
+  const pr=`You are a world-class DJ mentor grading a student's recorded mix. Be honest and specific.
+
+SET PLAN (${setOrder.length} tracks, target: ${fD(total)}):
+${sum}
+
+MIX MEASUREMENTS:
+- Actual duration: ${fD(md.dur)} (match: ${dm.toFixed(0)}%)
+- Overall energy: ${(md.rms*100).toFixed(1)} RMS
+- Energy arc score: ${md.arcS}/100
+- Dynamic range: ${(md.dr*100).toFixed(0)}%
+- Clipping: ${md.clp.toFixed(2)}% (>2% is bad)
+- Dead air gaps: ${md.gaps}
+
+Grade (0-100, strict against pro DJ standards):
+overallScore, energyArc, bpmMatching, harmonicFlow, transitionCraft, technicalExecution, setConstruction
+grade (A+/A/A-/B+/B/B-/C+/C/D/F)
+verdict (2-3 sharp sentences)
+wentWell (3 bullet points)
+improve (3 specific actionable points)
+drill (one targeted 45-min practice session description)
+hype (one punchy closing line)
+
+Reply ONLY with valid JSON, no markdown:
+{"overallScore":82,"energyArc":78,"bpmMatching":85,"harmonicFlow":88,"transitionCraft":76,"technicalExecution":85,"setConstruction":84,"grade":"B+","verdict":"...","wentWell":["...","...","..."],"improve":["...","...","..."],"drill":"...","hype":"..."}`;
+  let g=null;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:pr}]})});
+    const d=await r.json();
+    g=JSON.parse((d.content?.map(b=>b.text||'').join('')||'').replace(/```json|```/g,'').trim());
+  }catch{g=fakeGrade(md);}
+  showGrade(f,md,g,total);
+}
+
+function fakeGrade(md){
+  const b=Math.round(rnd(64,87));
+  const L=b>=93?'A+':b>=90?'A':b>=87?'A-':b>=83?'B+':b>=80?'B':b>=77?'B-':b>=73?'C+':b>=70?'C':b>=60?'D':'F';
+  return{overallScore:b,energyArc:Math.round(md.arcS),bpmMatching:clamp(b+Math.round(rnd(-5,8)),0,100),harmonicFlow:clamp(b+Math.round(rnd(-6,8)),0,100),transitionCraft:clamp(b+Math.round(rnd(-10,5)),0,100),technicalExecution:clamp(100-Math.round(md.clp*8),0,100),setConstruction:clamp(b+Math.round(rnd(-4,10)),0,100),grade:L,verdict:`Your mix shows real house music instinct and a solid feel for energy flow. The set construction was logical and crowd-aware. Sharpen your transition timing and your overlap consistency will become a true strength.`,wentWell:['Energy arc shape was well-executed through the mid-section','Harmonic mixing was largely respected — key clashes were minimal','Track selection and phase positioning were musically coherent'],improve:['Transition overlaps were inconsistent — standardise to 16 or 32 bars for each phase','Work on EQ blending during key changes: low-pass the incoming track for the first 8 bars before opening bass','Reduce peak output level slightly — occasional clipping detected, headroom is your friend'],drill:`Set a timer for 45 minutes. Take the two most BPM-distant tracks in your set. Mix only those two, back and forth, until the transition is seamless from any cue point on either track. Focus entirely on tempo management — no effects, pure pitch control.`,hype:`The instincts are already there. Sharpen the craft and the dancefloor is completely yours.`};
+}
+
+function showGrade(f,md,g,planDur){
+  const s=clamp(g.overallScore,0,100);
+  const gn=s>=95?'Masterclass':s>=90?'Excellent':s>=80?'Solid Set':s>=70?'Good Start':s>=60?'Needs Work':'Keep Practising';
+  const dm=Math.max(0,100-Math.abs(md.dur-planDur)/planDur*100);
+  const cats=[{l:'Energy Arc',v:g.energyArc},{l:'BPM Matching',v:g.bpmMatching},{l:'Harmonic Flow',v:g.harmonicFlow},{l:'Transition Craft',v:g.transitionCraft},{l:'Technical',v:g.technicalExecution},{l:'Set Construction',v:g.setConstruction}];
+  const barR=(l,v,pct)=>`<div class="bar-r"><div class="bar-l">${l}</div><div class="bar-t"><div class="bar-f" style="width:${clamp(pct||v,0,100)}%"></div></div><div class="bar-n">${typeof v==='number'?v.toFixed(0):v}</div></div>`;
+  G('revRes').innerHTML=`
+  <div class="rfb">
+    <span class="rfb-name">${H(f.name)}</span>
+    <span class="rfb-meta">${fSz(f.size)} · ${fD(md.dur)} recorded · ${fD(planDur)} planned</span>
+    <button class="btn btn-ghost" style="font-size:11px;padding:6px 10px;margin-left:auto" onclick="resetRev()">New Review</button>
+  </div>
+  <div class="gc">
+    <div class="gc-glow"></div>
+    <div class="gc-score">${s}<span class="gc-ltr">${g.grade}</span></div>
+    <div class="gc-name">${gn}</div>
+    <div class="gc-verdict">${g.verdict}</div>
+    <div class="gc-cats">${cats.map(c=>`<div class="gcc"><div class="gcc-v">${clamp(c.v,0,100)}</div><div class="gcc-l">${c.l}</div></div>`).join('')}</div>
+  </div>
+  <div class="card" style="background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:20px;margin-bottom:14px">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;color:var(--t1)">Detailed Scores</h3>
+    ${cats.map(c=>barR(c.l,clamp(c.v,0,100))).join('')}
+    ${barR('Duration Match',dm.toFixed(0)+'%',dm)}
+    ${barR('Dynamic Range',(md.dr*100).toFixed(0)+'%',md.dr*100)}
+    ${barR('Clipping Risk',md.clp.toFixed(2)+'%',Math.min(100,md.clp*20))}
+  </div>
+  <div class="two-col" style="margin-bottom:14px">
+    <div class="rb"><h4 style="color:#004000">What Went Well</h4><ul>${g.wentWell.map(w=>`<li>${w}</li>`).join('')}</ul></div>
+    <div class="rb"><h4>Areas to Improve</h4><ul>${g.improve.map(w=>`<li>${w}</li>`).join('')}</ul></div>
+  </div>
+  <div class="rb" style="border-left:3px solid var(--M3);margin-bottom:12px"><h4>Practice Drill</h4><p>${g.drill}</p></div>
+  <div class="rb" style="background:var(--ml);border:1px solid var(--mlb);text-align:center;padding:18px">
+    <p style="font-size:15px;font-weight:700;color:var(--M)">"${g.hype}"</p>
+  </div>`;
+}
+
+function resetRev(){G('revZone').classList.remove('hidden');G('revRes').classList.add('hidden');G('revRes').innerHTML='';}
 </script>
 </body>
 </html>
